@@ -1,13 +1,21 @@
 package main
 
 import (
+	crud "backend/controller"
+	"backend/models"
 	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/line/line-bot-sdk-go/v7/linebot"
+	"github.com/line/line-bot-sdk-go/linebot"
+
+	// "github.com/line/line-bot-sdk-go/v7/linebot"
+	// "google.golang.org/api/option"
+
 	"log"
 	"net/http"
 	"os"
+	// "cloud.google.com/go/firestore"
 )
 
 var connectBot *linebot.Client
@@ -70,6 +78,17 @@ func lineBot(c *gin.Context) {
 }
 
 func main() {
+
+	e := models.Product{
+		Name:    "Sam",
+		Barcode: "12312312312321312",
+	}
+	e.LeavesRemaining()
+	// -------- gin router
+	// app := App{}
+	// app.Init()
+	// app.Run()
+	// app.addProduct()
 	router := gin.Default()
 
 	err := godotenv.Load()
@@ -87,10 +106,20 @@ func main() {
 
 	router.POST("/callback", lineBot)
 
-	// productAPI := router.Group("/product")
-	// {
-	// 	productAPI.POST("/create", CreateProduct)
-	// }
+	productAPI := router.Group("/product")
+	{
+		productAPI.POST("/create", func(c *gin.Context) {
+			var form models.Product
+			if c.ShouldBind(&form) == nil {
+				crud.AddData(form)
+				c.JSON(http.StatusCreated, gin.H{
+					"message": "Add " + form.Barcode + " OK!",
+				})
+			} else {
+				c.JSON(401, gin.H{"status": "unable to bind data"})
+			}
+		})
+	}
 
 	router.Run(":" + os.Getenv("PORT"))
 }
