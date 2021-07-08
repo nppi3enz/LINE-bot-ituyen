@@ -7,9 +7,8 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"github.com/line/line-bot-sdk-go/linebot"
 
-	// "github.com/line/line-bot-sdk-go/v7/linebot"
+	"github.com/line/line-bot-sdk-go/v7/linebot"
 	// "google.golang.org/api/option"
 
 	"log"
