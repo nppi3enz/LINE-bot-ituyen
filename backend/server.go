@@ -90,9 +90,13 @@ func main() {
 	// app.addProduct()
 	router := gin.Default()
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	var port = os.Getenv("PORT")
+	if port == "" {
+		// is not heroku
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
 	}
 
 	router.GET("/", func(c *gin.Context) {
@@ -108,7 +112,7 @@ func main() {
 	productAPI := router.Group("/product")
 	{
 		productAPI.POST("/create", func(c *gin.Context) {
-			var form models.Product
+			var form models.ProductHasExpire
 			if c.ShouldBind(&form) == nil {
 				crud.AddData(form)
 				c.JSON(http.StatusCreated, gin.H{
@@ -121,7 +125,7 @@ func main() {
 	}
 
 	// router.Run(":" + os.Getenv("PORT"))
-	var port = os.Getenv("PORT")
+
 	if port == "" {
 		fmt.Println("Running on Heroku using random PORT")
 		router.Run()
