@@ -18,16 +18,15 @@ var ctx = context.Background()
 var client = Init(ctx)
 
 func Init(ctx context.Context) *firestore.Client {
-	sa := option.WithCredentialsFile("serviceAccountKey.json")
+	sa := option.WithCredentialsFile("google-credentials.json")
 	app, err := firebase.NewApp(ctx, nil, sa)
-	fmt.Println("app = ")
-	fmt.Println(app)
 
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	client, err := app.Firestore(ctx)
+	fmt.Println(client)
 	if err != nil {
 		log.Fatalln(err)
 	}
