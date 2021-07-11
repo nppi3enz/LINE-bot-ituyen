@@ -57,42 +57,60 @@ func Init(ctx context.Context) *firestore.Client {
 // 	return c.JSON(http.StatusOK, ProductsData)
 // }
 
-func AddData(p models.ProductHasExpire) {
-	// ProductsData := new(models.Product)
-	ProductsData := map[string]interface{}{
-		"name":    p.Name,
-		"barcode": p.Barcode,
-	}
-	doc, _, err := client.Collection("products").Add(ctx, ProductsData)
+func AddData(p models.ProductHasExpire) error {
 
-	if err != nil {
-		log.Fatalf("Failed adding product: %v", err)
-	}
-	
+	result := client.Collection("products").Where("barcode", "==", p.Barcode).Documents(ctx)
 
-	expiredTime, err := time.Parse(time.RFC3339, p.ExpireDate+"T00:00:00.000+07:00")
-	if err != nil {
-		fmt.Println(err)
-	}
+	var docData map[string]interface{}
 
-	InitialData := map[string]interface{}{
-		"expireDate": expiredTime,
-		"quantity":   p.Quantity,
-		"product": map[string]interface{}{
-			"ID":      doc.ID,
+	for {
+		doc, err := result.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		// fmt.Printf("Value = %s: %s", doc.Ref.ID, doc.Data())
+		// docID = doc.Ref.ID
+		docData = doc.Data()
+	}
+	if docData == nil {
+		ProductsData := map[string]interface{}{
 			"name":    p.Name,
 			"barcode": p.Barcode,
-		},
-	}
+		}
+		doc, _, err := client.Collection("products").Add(ctx, ProductsData)
 
-	doc, _, err = client.Collection("expiration").Add(ctx, InitialData)
+		if err != nil {
+			log.Fatalf("Failed adding product: %v", err)
+		}
+		expiredTime, err := time.Parse(time.RFC3339, p.ExpireDate+"T00:00:00.000+07:00")
+		if err != nil {
+			fmt.Println(err)
+		}
 
-	if err != nil {
-		log.Fatalf("Failed adding expired: %v", err)
+		InitialData := map[string]interface{}{
+			"expireDate": expiredTime,
+			"quantity":   p.Quantity,
+			"product": map[string]interface{}{
+				"ID":      doc.ID,
+				"name":    p.Name,
+				"barcode": p.Barcode,
+			},
+		}
+
+		doc, _, err = client.Collection("expiration").Add(ctx, InitialData)
+
+		if err != nil {
+			log.Fatalf("Failed adding expired: %v", err)
+		}
+	} else {
+		return errors.New("Already Add Barcode")
 	}
 
 	// return c.JSON(http.StatusCreated, nil)
-
+	return nil
 }
 
 // func Destroy(c *gin.Context) {

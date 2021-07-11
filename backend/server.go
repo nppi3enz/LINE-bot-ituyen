@@ -114,7 +114,13 @@ func main() {
 		productAPI.POST("/create", func(c *gin.Context) {
 			var form models.ProductHasExpire
 			if c.ShouldBind(&form) == nil {
-				crud.AddData(form)
+				result := crud.AddData(form)
+				if result != nil {
+					c.JSON(http.StatusUnprocessableEntity, gin.H{
+						"message": result.Error(),
+					})
+					return
+				}
 				c.JSON(http.StatusCreated, gin.H{
 					"message": "Add " + form.Barcode + " OK!",
 				})
