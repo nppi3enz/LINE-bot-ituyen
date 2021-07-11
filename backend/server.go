@@ -150,6 +150,24 @@ func main() {
 			}
 			c.JSON(http.StatusCreated, nil)
 		})
+		expireAPI.PUT("", func(c *gin.Context) {
+			var form models.ProductHasExpire
+			if c.ShouldBind(&form) == nil {
+				result := crud.UpdateExpire(form)
+				if result != nil {
+					c.JSON(http.StatusUnprocessableEntity, gin.H{
+						"message": result.Error(),
+					})
+					return
+				}
+				// c.JSON(http.StatusCreated, gin.H{
+				// 	"message": "Add " + form.Barcode + " OK!",
+				// })
+			} else {
+				c.JSON(401, gin.H{"status": "unable to bind data"})
+			}
+			c.JSON(http.StatusCreated, nil)
+		})
 		expireAPI.DELETE("", func(c *gin.Context) {
 			var form models.ProductHasExpire
 			if c.ShouldBind(&form) == nil {

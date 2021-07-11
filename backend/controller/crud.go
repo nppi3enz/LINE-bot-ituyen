@@ -137,11 +137,70 @@ func AddExpire(p models.ProductHasExpire) error {
 		docID = doc.Ref.ID
 		docData = doc.Data()
 	}
+	if docData == nil {
+		result = client.Collection("products").Where("barcode", "==", p.Barcode).Documents(ctx)
+		for {
+			doc, err := result.Next()
+			if err == iterator.Done {
+				break
+			}
+			if err != nil {
+				return err
+			}
+			// fmt.Printf("Value = %s: %s", doc.Ref.ID, doc.Data())
+			docID = doc.Ref.ID
+			docData = doc.Data()
+		}
+
+		fmt.Println(docData)
+		expiredTime, err := time.Parse(time.RFC3339, p.ExpireDate+"T00:00:00.000+07:00")
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		InitialData := map[string]interface{}{
+			"expireDate": expiredTime,
+			"quantity":   p.Quantity,
+			"product": map[string]interface{}{
+				"ID":      docID,
+				"name":    docData["name"],
+				"barcode": docData["barcode"],
+			},
+		}
+
+		_, _, err = client.Collection("expiration").Add(ctx, InitialData)
+
+		if err != nil {
+			log.Fatalf("Failed adding expired: %v", err)
+		}
+	} else {
+		return errors.New("Please Delete old expire before add new")
+	}
+	return nil
+}
+
+func UpdateExpire(p models.ProductHasExpire) error {
+	result := client.Collection("expiration").Where("product.barcode", "==", p.Barcode).Documents(ctx)
+	var docID string
+	var docData map[string]interface{}
+
+	for {
+		doc, err := result.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		// fmt.Printf("Value = %s: %s", doc.Ref.ID, doc.Data())
+		docID = doc.Ref.ID
+		docData = doc.Data()
+	}
 	if docData != nil {
 		_, err := client.Collection("expiration").Doc(docID).Update(ctx, []firestore.Update{
 			{
 				Path:  "quantity",
-				Value: firestore.Increment(p.Quantity),
+				Value: p.Quantity,
 			},
 		})
 		if err != nil {
