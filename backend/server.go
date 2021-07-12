@@ -4,6 +4,7 @@ import (
 	crud "backend/controller"
 	"backend/models"
 	"fmt"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -14,7 +15,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+
 	// "cloud.google.com/go/firestore"
+	cors "github.com/itsjamie/gin-cors"
 )
 
 var connectBot *linebot.Client
@@ -90,9 +93,24 @@ func main() {
 	// app.addProduct()
 	router := gin.Default()
 
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+	// Set up CORS middleware options
+	config := cors.Config{
+		Origins:        "*",
+		RequestHeaders: "Origin, Authorization, Content-Type",
+
+		Methods:         "GET, POST, PUT, DELETE",
+		Credentials:     true,
+		ValidateHeaders: false,
+		MaxAge:          1 * time.Minute,
+	}
+
+	var port = os.Getenv("PORT")
+	if port == "" {
+		// is not heroku
+		err := godotenv.Load()
+		if err != nil {
+			log.Fatal("Error loading .env file")
+		}
 	}
 
 	router.GET("/", func(c *gin.Context) {
@@ -108,9 +126,15 @@ func main() {
 	productAPI := router.Group("/product")
 	{
 		productAPI.POST("/create", func(c *gin.Context) {
-			var form models.Product
+			var form models.ProductHasExpire
 			if c.ShouldBind(&form) == nil {
-				crud.AddData(form)
+				result := crud.AddData(form)
+				if result != nil {
+					c.JSON(http.StatusUnprocessableEntity, gin.H{
+						"message": result.Error(),
+					})
+					return
+				}
 				c.JSON(http.StatusCreated, gin.H{
 					"message": "Add " + form.Barcode + " OK!",
 				})
@@ -120,8 +144,64 @@ func main() {
 		})
 	}
 
+	expireAPI := router.Group("/expire")
+	{
+		expireAPI.POST("", func(c *gin.Context) {
+			var form models.ProductHasExpire
+			if c.ShouldBind(&form) == nil {
+				result := crud.AddExpire(form)
+				if result != nil {
+					c.JSON(http.StatusUnprocessableEntity, gin.H{
+						"message": result.Error(),
+					})
+					return
+				}
+				// c.JSON(http.StatusCreated, gin.H{
+				// 	"message": "Add " + form.Barcode + " OK!",
+				// })
+			} else {
+				c.JSON(401, gin.H{"status": "unable to bind data"})
+			}
+			c.JSON(http.StatusCreated, nil)
+		})
+		expireAPI.PUT("", func(c *gin.Context) {
+			var form models.ProductHasExpire
+			if c.ShouldBind(&form) == nil {
+				result := crud.UpdateExpire(form)
+				if result != nil {
+					c.JSON(http.StatusUnprocessableEntity, gin.H{
+						"message": result.Error(),
+					})
+					return
+				}
+				// c.JSON(http.StatusCreated, gin.H{
+				// 	"message": "Add " + form.Barcode + " OK!",
+				// })
+			} else {
+				c.JSON(401, gin.H{"status": "unable to bind data"})
+			}
+			c.JSON(http.StatusCreated, nil)
+		})
+		expireAPI.DELETE("", func(c *gin.Context) {
+			var form models.ProductHasExpire
+			if c.ShouldBind(&form) == nil {
+				fmt.Printf("Delete barcode %v %v \n", form.Barcode, form.Quantity)
+				result := crud.RemoveExpire(form)
+				if result != nil {
+					c.JSON(http.StatusUnprocessableEntity, gin.H{
+						"message": result.Error(),
+					})
+					return
+				}
+			} else {
+				c.JSON(401, gin.H{"status": "unable to bind data"})
+			}
+			c.JSON(http.StatusNoContent, nil)
+		})
+	}
+
 	// router.Run(":" + os.Getenv("PORT"))
-	var port = os.Getenv("PORT")
+	router.Use(cors.Middleware(config))
 	if port == "" {
 		fmt.Println("Running on Heroku using random PORT")
 		router.Run()
