@@ -4,6 +4,7 @@ import (
 	crud "backend/controller"
 	"backend/models"
 	"fmt"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -14,7 +15,9 @@ import (
 	"log"
 	"net/http"
 	"os"
+
 	// "cloud.google.com/go/firestore"
+	cors "github.com/itsjamie/gin-cors"
 )
 
 var connectBot *linebot.Client
@@ -89,6 +92,17 @@ func main() {
 	// app.Run()
 	// app.addProduct()
 	router := gin.Default()
+
+	// Set up CORS middleware options
+	config := cors.Config{
+		Origins:        "*",
+		RequestHeaders: "Origin, Authorization, Content-Type",
+
+		Methods:         "GET, POST, PUT, DELETE",
+		Credentials:     true,
+		ValidateHeaders: false,
+		MaxAge:          1 * time.Minute,
+	}
 
 	var port = os.Getenv("PORT")
 	if port == "" {
@@ -187,7 +201,7 @@ func main() {
 	}
 
 	// router.Run(":" + os.Getenv("PORT"))
-
+	router.Use(cors.Middleware(config))
 	if port == "" {
 		fmt.Println("Running on Heroku using random PORT")
 		router.Run()
