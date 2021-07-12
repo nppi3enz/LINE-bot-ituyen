@@ -49,7 +49,7 @@
             :min="1"
           />
         </FormItem>
-        <Button type="primary">
+        <Button type="primary" @click="submit()">
           Submit
         </Button>
       </Form>
@@ -60,7 +60,9 @@
 <script>
 import { StreamBarcodeReader } from 'vue-barcode-reader'
 import { Form, Button, Input, FormItem, InputNumber, DatePicker } from 'element-ui'
+import liff from '@line/liff'
 
+liff.init({ liffId: '1656205141-4MGkXWrz' })
 export default {
 //   name: "HelloWorld",
   components: {
@@ -129,7 +131,28 @@ export default {
       const today = new Date()
       const date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate()
       this.expireDate = date
+    },
+    async submit () {
+      // alert('submit')
+      const data = await this.$axios.$post('/api/product/create', {
+        name: this.productName,
+        barcode: this.barcode,
+        expire_date: this.expireDate,
+        quantity: this.quantity
+      }).then((response) => {
+        console.log(data.response.status)
+        liff.closeWindow()
+      }).catch(function (error) {
+        if (error.response) {
+          console.log(error.response.data)
+          console.log(error.response.status)
+          console.log(error.response.headers)
+          alert(`Error: ${error.response.data.message}`)
+        }
+      })
+      // return {posts: data}
     }
+
   }
 }
 </script>
