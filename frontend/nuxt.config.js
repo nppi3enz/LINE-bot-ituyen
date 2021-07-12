@@ -50,7 +50,9 @@ export default {
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
-    proxy: true
+    baseURL: 'https://ituyen.herokuapp.com',
+    proxyHeaders: false,
+    credentials: false
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build

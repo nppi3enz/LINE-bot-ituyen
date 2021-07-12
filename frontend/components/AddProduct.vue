@@ -108,6 +108,7 @@ export default {
     // msg: String,
   },
   created () {
+    this.$axios.get('https://ituyen.herokuapp.com').then(response => console.log(response))
     this.getNow()
   },
   methods: {
@@ -134,7 +135,7 @@ export default {
     },
     async submit () {
       // alert('submit')
-      const data = await this.$axios.$post('/api/product/create', {
+      const data = await this.$axios.$post('https://ituyen.herokuapp.com/product/create', {
         name: this.productName,
         barcode: this.barcode,
         expire_date: this.expireDate,
