@@ -6,7 +6,8 @@
   headers = {X-From = "Netlify"}
 
 [[redirects]]
-  from = "/api/product/create"
-  to = "https://staging-ituyen.herokuapp.com/product/create"
+  from = "/api/*
+  to = ":splat"
+  status = 200
   force = true
-  headers = {X-From = "Netlify"}
+  headers = {Access-Control-Allow-Origin = "*"}
