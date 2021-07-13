@@ -3,11 +3,11 @@ export default {
   ssr: false,
 
   // Target: https://go.nuxtjs.dev/config-target
-  target: 'static',
+  target: 'server',
 
   // Global page headers: https://go.nuxtjs.dev/config-head
   head: {
-    title: 'iTuYen',
+    title: 'iTUYEN',
     htmlAttrs: {
       lang: 'en'
     },
@@ -19,6 +19,12 @@ export default {
     ],
     link: [
       { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+    ],
+    script: [
+      {
+        hid: 'liff',
+        src: 'https://static.line-scdn.net/liff/edge/versions/2.12.0/sdk.js'
+      }
     ]
   },
 
@@ -39,7 +45,8 @@ export default {
   // Modules for dev and build (recommended): https://go.nuxtjs.dev/config-modules
   buildModules: [
     // https://go.nuxtjs.dev/eslint
-    '@nuxtjs/eslint-module'
+    '@nuxtjs/eslint-module',
+    '@nuxtjs/tailwindcss'
   ],
 
   // Modules: https://go.nuxtjs.dev/config-modules
@@ -51,22 +58,19 @@ export default {
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
-    // proxy: true
-    baseURL: 'https://ituyen.herokuapp.com',
-    proxyHeaders: false,
-    credentials: false
+    proxy: true
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
-    transpile: [/^element-ui/]
+    // transpile: [/^element-ui/]
   },
 
   proxy: {
-    // '/api': {
-    //   target: 'https://ituyen.herokuapp.com/',
-    //   pathRewrite: { '^/api': '' },
-    //   changeOrigin: true
-    // }
+    '/api': {
+      target: 'https://staging-api-ituyen.herokuapp.com',
+      pathRewrite: { '^/api': '' },
+      changeOrigin: true
+    }
   }
 }

@@ -1,114 +1,172 @@
 <template>
-    <div>
-    <h1>Add Product</h1>
-    <div v-if="!scanForm" id="scan">
-        Please scan barcode before add product.
-    <StreamBarcodeReader
-      @decode="(a, b, c) => onDecode(a, b, c)"
-      @loaded="() => onLoaded()"
-    ></StreamBarcodeReader>
-    Input Value: {{ barcode || "Nothing" }}
-    </div>
-    <div v-if="scanForm" id="input">
-      <Form ref="form" :model="form" label-width="120px">
-        <FormItem label="Barcode">
-          <Input placeholder="Barcode" v-model="barcode" :disabled="true" />
-        </FormItem>
-        <FormItem label="Product name">
-          <Input placeholder="Product Name" v-model="productName" />
-        </FormItem>
-        <FormItem label="Product List">
-          <!-- <Input placeholder="Product List" v-model="text" /> -->
-          <el-select v-model="productList" placeholder="Select">
-            <el-option
-            v-for="item in options"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
-            </el-option>
-          </el-select>
-        </FormItem>
-        <FormItem label="Expire Date">
-          <div v-if="hasExpired">
-            <DatePicker
-                placeholder="Expire Date"
-                type="date"
-                :picker-options="pickerOptions"
-                v-model="expireDate"
+  <div>
+    <header class="bg-white shadow">
+      <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+        <h1 class="text-3xl font-bold text-gray-900">
+          Add Product
+        </h1>
+        {{ userID }}
+      </div>
+    </header>
+    <main>
+      <div class="max-w-7xl mx-auto py-0 sm:px-6 lg:px-8">
+        <!-- Replace with your content -->
+        <div class="px-4 py-6 sm:px-0">
+          <div v-if="step == 1" class="border-4 border-gray-200 rounded-lg p-2">
+            Please Wait...
+          </div>
+          <div v-if="step == 2" class="border-4 border-gray-200 rounded-lg p-2">
+            <StreamBarcodeReader
+              @decode="(a, b, c) => onDecode(a, b, c)"
+              @loaded="() => onLoaded()"
             />
           </div>
-          <el-switch
-            v-model="hasExpired"
-            active-text="ON"
-            inactive-text="OFF">
-          </el-switch>
-        </FormItem>
-        <FormItem label="Quantitys">
-          <InputNumber
-            v-model="quantity"
-            :min="1"
-          />
-        </FormItem>
-        <Button type="primary" @click="submit()">
-          Submit
-        </Button>
-      </Form>
-    </div>
+          <div v-if="step == 3" class="border-4 border-gray-200 rounded-lg p-2">
+            <div class="px-2 py-2 bg-white sm:p-6">
+              <div class="grid gap-4">
+                <div class="col-span-6 sm:col-span-3">
+                  <label for="barcode" class="block text-sm font-medium text-gray-700">Barcode</label>
+                  <input
+                    id="barcode"
+                    v-model="barcode"
+                    type="text"
+                    name="barcode"
+                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md disabled:opacity-50"
+                    :disabled="true"
+                  >
+                </div>
+                <div class="col-span-6 sm:col-span-3">
+                  <label for="productName" class="block text-sm font-medium text-gray-700">Product Name</label>
+                  <input type="text" name="productName" id="productName" v-model="productName" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                </div>
+                <div class="col-span-6 sm:col-span-3">
+                  <label for="productList" class="block text-sm font-medium text-gray-700">Product List</label>
+                  <select id="productList" name="productList" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                    <option
+                      v-for="item in options"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    />
+                  </select>
+                </div>
+                <div class="col-span-6 sm:col-span-3">
+                  <div class="flex">
+                    <div class="flex-auto">
+                      <label for="first-name" class="block text-sm font-medium text-gray-700">Expire Date</label>
+                      <input
+                        id="expireDate"
+                        v-model="expireDate"
+                        class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                        type="date"
+                        name="expireDate"
+                        :min="minDate"
+                        :max="maxDate"
+                      >
+                    </div>
+                  </div>
+                </div>
+                <div class="col-span-6 sm:col-span-3">
+                  <label for="quantity" class="block text-sm font-medium text-gray-700">Quantity</label>
+                  <div class="custom-number-input">
+                      <div class="flex flex-row h-10 w-full rounded-lg relative bg-transparent mt-1">
+                        <button
+                          data-action="decrement"
+                          class="bg-gray-300 text-gray-600 hover:text-gray-700 hover:bg-gray-400 h-full w-20 rounded-l cursor-pointer outline-none"
+                          @click="increment(-1)"
+                        >
+                          <span class="m-auto text-2xl font-thin">−</span>
+                        </button>
+                        <input
+                          type="number"
+                          class="outline-none focus:outline-none text-center w-full font-semibold text-md hover:text-black focus:text-black  md:text-basecursor-default flex items-center outline-none"
+                          name="quantity"
+                          v-model="quantity"
+                        />
+                        <button
+                          data-action="increment"
+                          class="bg-gray-300 text-gray-600 hover:text-gray-700 hover:bg-gray-400 h-full w-20 rounded-r cursor-pointer"
+                          @click="increment(1)"
+                        >
+                          <span class="m-auto text-2xl font-thin">+</span>
+                        </button>
+                      </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div v-if="step == 3" class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+              <button @click="submit()" type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+                Submit
+              </button>
+              <button @click="reset()" type="reset" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-black bg-gray-300 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300">
+                Reset
+              </button>
+            </div>
+          </div>
+          <div v-if="step == 4" class="border-4 border-gray-200 rounded-lg p-2 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 fill-current text-emerald-600 icon" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+            </svg>
+            Add Complete
+          </div>
+        </div>
+        <!-- /End replace -->
+      </div>
+    </main>
   </div>
 </template>
 
 <script>
 import { StreamBarcodeReader } from 'vue-barcode-reader'
-import { Form, Button, Input, FormItem, InputNumber, DatePicker } from 'element-ui'
-import liff from '@line/liff'
+// import liff from '@line/liff'
 
-liff.init({ liffId: '1656205141-4MGkXWrz' })
 export default {
-//   name: "HelloWorld",
   components: {
-    StreamBarcodeReader,
-    Input,
-    Form,
-    FormItem,
-    Button,
-    InputNumber,
-    DatePicker
-    // Row,
-    // Col
+    StreamBarcodeReader
   },
   data () {
     return {
     //   text: '',
-      scanForm: false,
-      id: null,
+      step: 1,
+      userID: null,
       barcode: '',
       productName: '',
       productList: '1',
       hasExpired: true,
       expireDate: '',
-      quantity: 0,
+      quantity: 1,
       pickerOptions: {
         disabledDate (time) {
           return time.getTime() < Date.now()
         }
-        // shortcuts: [{
-        //   text: 'Today',
-        //   onClick (picker) {
-        //     picker.$emit('pick', new Date());
-        //   }
-        // }]
       },
       options: [{
         value: '1',
         label: 'Fridge'
-      }]
+      }],
+      minDate: '',
+      maxDate: '',
+      accessToken: null,
+      browserLanguage: null,
+      sdkVersion: null,
+      isInClient: null,
+      isLoggedIn: null,
+      deviceOS: null
     }
   },
-  props: {
-    // msg: String,
+  beforeCreate () {
   },
-  created () {
-    this.$axios.get('https://staging-ituyen.herokuapp.com', {
+  async mounted () {
+    await liff.init({ liffId: '1656205141-7Eg1vzl6' })
+      .then(() => {
+        if (!liff.isLoggedIn()) {
+          liff.login()
+        } else {
+          this.step++
+        }
+      })
+    this.$axios.get('/api', {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/Json'
@@ -120,7 +178,7 @@ export default {
     onDecode (a, b, c) {
       console.log(a, b, c)
       this.barcode = a
-      this.scanForm = true
+      this.step++
       if (this.id) {
         clearTimeout(this.id)
       }
@@ -135,19 +193,32 @@ export default {
     },
     getNow () {
       const today = new Date()
-      const date = today.getFullYear() + '-' + (today.getMonth() + 1) + '-' + today.getDate()
+      const date = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate() + 1).padStart(2, '0')
       this.expireDate = date
+      this.minDate = date
+    },
+    increment (n) {
+      if (this.quantity + n > 0) {
+        this.quantity += n
+      }
     },
     async submit () {
       // alert('submit')
-      const data = await this.$axios.$post('https://staging-ituyen.herokuapp.com/product/create', {
+      const data = await this.$axios.$post('/api/product/create', {
         name: this.productName,
         barcode: this.barcode,
         expire_date: this.expireDate,
         quantity: this.quantity
       }).then((response) => {
-        console.log(data.response.status)
-        liff.closeWindow()
+        liff.sendMessages([
+          {
+            type: 'text',
+            text: `เพิ่มสินค้า ${this.productName} เรียบร้อยแล้ว`
+          }
+        ])
+          .catch((err) => {
+            alert(err)
+          })
       }).catch(function (error) {
         if (error.response) {
           console.log(error.response.data)
@@ -157,18 +228,49 @@ export default {
         }
       })
       // return {posts: data}
-    }
-
-  },
-  render: {
-    static: {
-      setHeaders (res) {
-        res.setHeader('X-Frame-Options', 'ALLOWALL')
-        res.setHeader('Access-Control-Allow-Origin', '*')
-        res.setHeader('Access-Control-Allow-Methods', 'GET')
-        res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
-      }
+      liff.closeWindow()
+      this.step++
+    },
+    reset () {
+      this.productName = ''
+      this.productList = '1'
+      this.hasExpired = true
+      this.expireDate = ''
+      this.quantity = 1
+    },
+    login () {
+      liff.login({ redirectUri: 'https://ituyen.herokuapp.com/add-product' })
     }
   }
 }
 </script>
+<style scoped>
+/* Toggle A */
+input:checked ~ .dot {
+  transform: translateX(100%);
+  background-color: #48bb78;
+}
+
+/* Toggle B */
+input:checked ~ .dot {
+  transform: translateX(100%);
+  background-color: #48bb78;
+}
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.custom-number-input input:focus {
+  outline: none !important;
+}
+
+.custom-number-input button:focus {
+  outline: none !important;
+}
+.icon{
+  display: block;
+  margin: auto;
+}
+</style>
