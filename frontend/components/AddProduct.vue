@@ -108,7 +108,7 @@ export default {
     // msg: String,
   },
   created () {
-    this.$axios.get('/api', {
+    this.$axios.get('https://staging-ituyen.herokuapp.com', {
       headers: {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/Json'
@@ -140,7 +140,7 @@ export default {
     },
     async submit () {
       // alert('submit')
-      const data = await this.$axios.$post('/api/product/create', {
+      const data = await this.$axios.$post('https://staging-ituyen.herokuapp.com/product/create', {
         name: this.productName,
         barcode: this.barcode,
         expire_date: this.expireDate,
