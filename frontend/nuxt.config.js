@@ -45,12 +45,16 @@ export default {
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
     // https://go.nuxtjs.dev/axios
-    '@nuxtjs/axios'
+    '@nuxtjs/axios',
+    '@nuxtjs/proxy'
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {
     proxy: true
+    // baseURL: 'https://ituyen.herokuapp.com',
+    // proxyHeaders: false,
+    // credentials: false
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build
@@ -59,6 +63,10 @@ export default {
   },
 
   proxy: {
-    '/api': { target: 'https://ituyen.herokuapp.com/', pathRewrite: { '^/api': '' } }
+    '/api': {
+      target: 'https://ituyen.herokuapp.com/',
+      pathRewrite: { '^/api': '' }
+      // changeOrigin: true
+    }
   }
 }

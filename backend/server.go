@@ -17,7 +17,7 @@ import (
 	"os"
 
 	// "cloud.google.com/go/firestore"
-	cors "github.com/itsjamie/gin-cors"
+	"github.com/gin-contrib/cors"
 )
 
 var connectBot *linebot.Client
@@ -58,9 +58,9 @@ func lineBot(c *gin.Context) {
 					}
 				} else if message.Text == "carousel" {
 				} else if message.Text == "เช็ควันหมดอายุ" {
-					if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("รออีกแปปน๊า")).Do(); err != nil {
-						log.Print(err)
-					}
+					// if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("รออีกแปปน๊า")).Do(); err != nil {
+					// 	log.Print(err)
+					// }
 				}
 				// if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(message.Text)).Do(); err != nil {
 				// 	log.Print(err)
@@ -95,13 +95,15 @@ func main() {
 
 	// Set up CORS middleware options
 	config := cors.Config{
-		Origins:        "*",
-		RequestHeaders: "Origin, Authorization, Content-Type",
-
-		Methods:         "GET, POST, PUT, DELETE",
-		Credentials:     true,
-		ValidateHeaders: false,
-		MaxAge:          1 * time.Minute,
+		AllowOrigins:     []string{"https://line-bot-ituyen.web.app", "https://ituyen.netlify.app"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Origin"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		AllowOriginFunc: func(origin string) bool {
+			return origin == "https://line-bot-ituyen.web.app"
+		},
+		MaxAge: 12 * time.Hour,
 	}
 
 	var port = os.Getenv("PORT")
@@ -201,7 +203,7 @@ func main() {
 	}
 
 	// router.Run(":" + os.Getenv("PORT"))
-	router.Use(cors.Middleware(config))
+	router.Use(cors.New(config))
 	if port == "" {
 		fmt.Println("Running on Heroku using random PORT")
 		router.Run()

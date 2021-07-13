@@ -108,6 +108,12 @@ export default {
     // msg: String,
   },
   created () {
+    this.$axios.get('/api', {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/Json'
+      }
+    }).then(response => console.log(response))
     this.getNow()
   },
   methods: {
@@ -153,6 +159,16 @@ export default {
       // return {posts: data}
     }
 
+  },
+  render: {
+    static: {
+      setHeaders (res) {
+        res.setHeader('X-Frame-Options', 'ALLOWALL')
+        res.setHeader('Access-Control-Allow-Origin', '*')
+        res.setHeader('Access-Control-Allow-Methods', 'GET')
+        res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+      }
+    }
   }
 }
 </script>
