@@ -65,8 +65,8 @@ export default {
   proxy: {
     '/api': {
       target: 'https://ituyen.herokuapp.com/',
-      pathRewrite: { '^/api': '' },
-      changeOrigin: true
+      pathRewrite: { '^/api': '' }
+      // changeOrigin: true
     }
   }
 }
