@@ -95,7 +95,7 @@ func main() {
 
 	// Set up CORS middleware options
 	config := cors.Config{
-		AllowOrigins:     []string{"https://line-bot-ituyen.web.app", ""},
+		AllowOrigins:     []string{"https://line-bot-ituyen.web.app", "https://ituyen.netlify.app"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin"},
 		ExposeHeaders:    []string{"Content-Length"},
