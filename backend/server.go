@@ -58,9 +58,9 @@ func lineBot(c *gin.Context) {
 					}
 				} else if message.Text == "carousel" {
 				} else if message.Text == "เช็ควันหมดอายุ" {
-					if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("รออีกแปปน๊า")).Do(); err != nil {
-						log.Print(err)
-					}
+					// if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("รออีกแปปน๊า")).Do(); err != nil {
+					// 	log.Print(err)
+					// }
 				}
 				// if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(message.Text)).Do(); err != nil {
 				// 	log.Print(err)
