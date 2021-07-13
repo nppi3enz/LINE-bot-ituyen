@@ -6,7 +6,7 @@
   headers = {X-From = "Netlify"}
 
 [[redirects]]
-  from = "/api/*"
-  to = "https://staging-ituyen.herokuapp.com/*"
+  from = "/api/product/create"
+  to = "https://staging-ituyen.herokuapp.com/product/create"
   force = true
   headers = {X-From = "Netlify"}
