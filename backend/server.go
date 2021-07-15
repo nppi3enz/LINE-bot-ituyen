@@ -130,7 +130,6 @@ func main() {
 	{
 		productAPI.GET("", func(c *gin.Context) {
 			barcode := c.Query("barcode")
-			fmt.Println("barcode = " + barcode)
 			input := map[string]string{
 				"Barcode": barcode,
 			}
@@ -158,9 +157,19 @@ func main() {
 		})
 	}
 
-	expireAPI := router.Group("/expiry")
+	expiryAPI := router.Group("/expiry")
 	{
-		expireAPI.POST("", func(c *gin.Context) {
+		expiryAPI.GET("", func(c *gin.Context) {
+			barcode := c.Query("barcode")
+			input := map[string]string{
+				"Barcode": barcode,
+			}
+			result := crud.ListExpiry(input)
+			c.JSON(http.StatusOK, gin.H{
+				"data": result,
+			})
+		})
+		expiryAPI.POST("", func(c *gin.Context) {
 			var form models.ProductHasExpiry
 			if c.ShouldBind(&form) == nil {
 				result := crud.AddExpiry(form)
@@ -178,7 +187,7 @@ func main() {
 			}
 			c.JSON(http.StatusCreated, nil)
 		})
-		expireAPI.PUT("", func(c *gin.Context) {
+		expiryAPI.PUT("", func(c *gin.Context) {
 			var form models.ProductHasExpiry
 			if c.ShouldBind(&form) == nil {
 				result := crud.UpdateExpiry(form)
@@ -196,7 +205,7 @@ func main() {
 			}
 			c.JSON(http.StatusCreated, nil)
 		})
-		expireAPI.DELETE("", func(c *gin.Context) {
+		expiryAPI.DELETE("", func(c *gin.Context) {
 			var form models.ProductHasExpiry
 			if c.ShouldBind(&form) == nil {
 				fmt.Printf("Delete barcode %v %v \n", form.Barcode, form.Quantity)

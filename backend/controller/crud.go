@@ -73,16 +73,17 @@ func List(p map[string]string) []models.Product {
 		if err == iterator.Done {
 			break
 		}
+		// fmt.Printf("Value = %s: %s", doc.Ref.ID, doc.Data())
 		// if err != nil {
 		// 	return []
 		// }
 		var b models.Product
 		if err := doc.DataTo(&b); err != nil {
 			// Handle error, possibly by returning the error
+			fmt.Println("Error!")
 		}
-		fmt.Println(b)
+
 		products = append(products, b)
-		// fmt.Printf("Value = %s: %s", doc.Ref.ID, doc.Data())
 	}
 	return products
 }
@@ -148,7 +149,39 @@ func AddData(p models.ProductHasExpiry) error {
 // 	return c.JSON(http.StatusNoContent, nil)
 // 	// _, _, err := client.Collection("income-v2").Add(ctx, IncomesData)
 // }
+func ListExpiry(p map[string]string) []models.Expiry {
+	// result := client.Collection("expiry").Where("product.barcode", "==", p.Barcode).Documents(ctx)
 
+	col := client.Collection("expiry")
+
+	var query firestore.Query
+	query = col.Query
+	if p["Barcode"] != "" {
+		query = col.Where("product.barcode", "==", p["Barcode"])
+	}
+
+	docs := query.Documents(ctx)
+
+	var expiries []models.Expiry
+	for {
+		doc, err := docs.Next()
+		if err == iterator.Done {
+			break
+		}
+		// if err != nil {
+		// 	return []
+		// }
+		var b models.Expiry
+		fmt.Println(b)
+		if err := doc.DataTo(&b); err != nil {
+			// Handle error, possibly by returning the error
+		}
+		fmt.Println(b)
+		expiries = append(expiries, b)
+		// fmt.Printf("Value = %s: %s", doc.Ref.ID, doc.Data())
+	}
+	return expiries
+}
 func AddExpiry(p models.ProductHasExpiry) error {
 	result := client.Collection("expiry").Where("product.barcode", "==", p.Barcode).Documents(ctx)
 	var docID string
