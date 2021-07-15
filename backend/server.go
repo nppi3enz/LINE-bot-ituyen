@@ -58,9 +58,40 @@ func lineBot(c *gin.Context) {
 					}
 				} else if message.Text == "carousel" {
 				} else if message.Text == "เช็ควันหมดอายุ" {
-					// if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("รออีกแปปน๊า")).Do(); err != nil {
-					// 	log.Print(err)
-					// }
+					// Make Contents
+					var contents []linebot.FlexComponent
+					text := linebot.TextComponent{
+						Type:   linebot.FlexComponentTypeText,
+						Text:   "Brown Cafe",
+						Weight: "bold",
+						Size:   linebot.FlexTextSizeTypeXl,
+					}
+					contents = append(contents, &text)
+					// Make Hero
+					hero := linebot.ImageComponent{
+						Type:        linebot.FlexComponentTypeImage,
+						URL:         "https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png",
+						Size:        "full",
+						AspectRatio: linebot.FlexImageAspectRatioType20to13,
+						AspectMode:  linebot.FlexImageAspectModeTypeCover,
+						Action:      linebot.NewMessageAction("left", "left clicked"),
+					}
+					// Make Body
+					body := linebot.BoxComponent{
+						Type:     linebot.FlexComponentTypeBox,
+						Layout:   linebot.FlexBoxLayoutTypeVertical,
+						Contents: contents,
+					}
+					// Build Container
+					bubble := linebot.BubbleContainer{
+						Type: linebot.FlexContainerTypeBubble,
+						Hero: &hero,
+						Body: &body,
+					}
+					flexMessage := linebot.NewFlexMessage("เช็ควันหมดอายุ", &bubble)
+					if _, err = bot.ReplyMessage(event.ReplyToken, flexMessage).Do(); err != nil {
+						log.Print(err)
+					}
 				}
 				// if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(message.Text)).Do(); err != nil {
 				// 	log.Print(err)
