@@ -56,7 +56,36 @@ func Init(ctx context.Context) *firestore.Client {
 // 	}
 // 	return c.JSON(http.StatusOK, ProductsData)
 // }
+func List(p map[string]string) []models.Product {
+	col := client.Collection("products")
 
+	var query firestore.Query
+	if p["Barcode"] != "" {
+		query = col.Where("barcode", "==", p["Barcode"])
+	}
+	query = col.Query
+
+	docs := query.Documents(ctx)
+
+	var products []models.Product
+	for {
+		doc, err := docs.Next()
+		if err == iterator.Done {
+			break
+		}
+		// if err != nil {
+		// 	return []
+		// }
+		var b models.Product
+		if err := doc.DataTo(&b); err != nil {
+			// Handle error, possibly by returning the error
+		}
+		fmt.Println(b)
+		products = append(products, b)
+		// fmt.Printf("Value = %s: %s", doc.Ref.ID, doc.Data())
+	}
+	return products
+}
 func AddData(p models.ProductHasExpire) error {
 
 	result := client.Collection("products").Where("barcode", "==", p.Barcode).Documents(ctx)

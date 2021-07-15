@@ -128,6 +128,17 @@ func main() {
 
 	productAPI := router.Group("/product")
 	{
+		productAPI.GET("", func(c *gin.Context) {
+			barcode := c.Query("barcode")
+			fmt.Println("barcode = " + barcode)
+			input := map[string]string{
+				"Barcode": barcode,
+			}
+			result := crud.List(input)
+			c.JSON(http.StatusOK, gin.H{
+				"data": result,
+			})
+		})
 		productAPI.POST("/create", func(c *gin.Context) {
 			var form models.ProductHasExpire
 			if c.ShouldBind(&form) == nil {
