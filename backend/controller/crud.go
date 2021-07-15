@@ -56,8 +56,38 @@ func Init(ctx context.Context) *firestore.Client {
 // 	}
 // 	return c.JSON(http.StatusOK, ProductsData)
 // }
+func List(p map[string]string) []models.Product {
+	col := client.Collection("products")
 
-func AddData(p models.ProductHasExpire) error {
+	var query firestore.Query
+	query = col.Query
+	if p["Barcode"] != "" {
+		query = col.Where("barcode", "==", p["Barcode"])
+	}
+
+	docs := query.Documents(ctx)
+
+	var products []models.Product
+	for {
+		doc, err := docs.Next()
+		if err == iterator.Done {
+			break
+		}
+		// fmt.Printf("Value = %s: %s", doc.Ref.ID, doc.Data())
+		// if err != nil {
+		// 	return []
+		// }
+		var b models.Product
+		if err := doc.DataTo(&b); err != nil {
+			// Handle error, possibly by returning the error
+			fmt.Println("Error!")
+		}
+
+		products = append(products, b)
+	}
+	return products
+}
+func AddData(p models.ProductHasExpiry) error {
 
 	result := client.Collection("products").Where("barcode", "==", p.Barcode).Documents(ctx)
 
@@ -100,7 +130,7 @@ func AddData(p models.ProductHasExpire) error {
 			},
 		}
 
-		doc, _, err = client.Collection("expiration").Add(ctx, InitialData)
+		doc, _, err = client.Collection("expiry").Add(ctx, InitialData)
 
 		if err != nil {
 			log.Fatalf("Failed adding expired: %v", err)
@@ -119,9 +149,41 @@ func AddData(p models.ProductHasExpire) error {
 // 	return c.JSON(http.StatusNoContent, nil)
 // 	// _, _, err := client.Collection("income-v2").Add(ctx, IncomesData)
 // }
+func ListExpiry(p map[string]string) []models.Expiry {
+	// result := client.Collection("expiry").Where("product.barcode", "==", p.Barcode).Documents(ctx)
 
-func AddExpire(p models.ProductHasExpire) error {
-	result := client.Collection("expiration").Where("product.barcode", "==", p.Barcode).Documents(ctx)
+	col := client.Collection("expiry")
+
+	var query firestore.Query
+	query = col.Query
+	if p["Barcode"] != "" {
+		query = col.Where("product.barcode", "==", p["Barcode"])
+	}
+
+	docs := query.Documents(ctx)
+
+	var expiries []models.Expiry
+	for {
+		doc, err := docs.Next()
+		if err == iterator.Done {
+			break
+		}
+		// if err != nil {
+		// 	return []
+		// }
+		var b models.Expiry
+		fmt.Println(b)
+		if err := doc.DataTo(&b); err != nil {
+			// Handle error, possibly by returning the error
+		}
+		fmt.Println(b)
+		expiries = append(expiries, b)
+		// fmt.Printf("Value = %s: %s", doc.Ref.ID, doc.Data())
+	}
+	return expiries
+}
+func AddExpiry(p models.ProductHasExpiry) error {
+	result := client.Collection("expiry").Where("product.barcode", "==", p.Barcode).Documents(ctx)
 	var docID string
 	var docData map[string]interface{}
 
@@ -168,19 +230,19 @@ func AddExpire(p models.ProductHasExpire) error {
 			},
 		}
 
-		_, _, err = client.Collection("expiration").Add(ctx, InitialData)
+		_, _, err = client.Collection("expiry").Add(ctx, InitialData)
 
 		if err != nil {
 			log.Fatalf("Failed adding expired: %v", err)
 		}
 	} else {
-		return errors.New("Please Delete old expire before add new")
+		return errors.New("Please Delete old expiry before add new")
 	}
 	return nil
 }
 
-func UpdateExpire(p models.ProductHasExpire) error {
-	result := client.Collection("expiration").Where("product.barcode", "==", p.Barcode).Documents(ctx)
+func UpdateExpiry(p models.ProductHasExpiry) error {
+	result := client.Collection("expiry").Where("product.barcode", "==", p.Barcode).Documents(ctx)
 	var docID string
 	var docData map[string]interface{}
 
@@ -197,7 +259,7 @@ func UpdateExpire(p models.ProductHasExpire) error {
 		docData = doc.Data()
 	}
 	if docData != nil {
-		_, err := client.Collection("expiration").Doc(docID).Update(ctx, []firestore.Update{
+		_, err := client.Collection("expiry").Doc(docID).Update(ctx, []firestore.Update{
 			{
 				Path:  "quantity",
 				Value: p.Quantity,
@@ -213,8 +275,8 @@ func UpdateExpire(p models.ProductHasExpire) error {
 	return nil
 }
 
-func RemoveExpire(p models.ProductHasExpire) error {
-	result := client.Collection("expiration").Where("product.barcode", "==", p.Barcode).Documents(ctx)
+func RemoveExpiry(p models.ProductHasExpiry) error {
+	result := client.Collection("expiry").Where("product.barcode", "==", p.Barcode).Documents(ctx)
 	var docID string
 	var docData map[string]interface{}
 
@@ -233,14 +295,14 @@ func RemoveExpire(p models.ProductHasExpire) error {
 	if docData != nil {
 		if docData["quantity"].(int64) <= 1 {
 			// delete
-			_, err := client.Collection("expiration").Doc(docID).Delete(ctx)
+			_, err := client.Collection("expiry").Doc(docID).Delete(ctx)
 			if err != nil {
 				// Handle any errors in an appropriate way, such as returning them.
 				log.Printf("An error has occurred: %s", err)
 			}
 		} else {
 			// minus 1 item
-			_, err := client.Collection("expiration").Doc(docID).Update(ctx, []firestore.Update{
+			_, err := client.Collection("expiry").Doc(docID).Update(ctx, []firestore.Update{
 				{
 					Path:  "quantity",
 					Value: firestore.Increment(-1 * p.Quantity),

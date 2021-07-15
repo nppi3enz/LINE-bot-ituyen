@@ -3,7 +3,7 @@
     <header class="bg-white shadow">
       <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
         <h1 class="text-3xl font-bold text-gray-900">
-          Add Product
+          Remove Product
         </h1>
       </div>
     </header>
@@ -36,34 +36,14 @@
                 </div>
                 <div class="col-span-6 sm:col-span-3">
                   <label for="productName" class="block text-sm font-medium text-gray-700">Product Name</label>
-                  <input type="text" name="productName" id="productName" v-model="productName" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
-                </div>
-                <div class="col-span-6 sm:col-span-3">
-                  <label for="productList" class="block text-sm font-medium text-gray-700">Product List</label>
-                  <select id="productList" name="productList" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    <option
-                      v-for="item in options"
-                      :key="item.value"
-                      :label="item.label"
-                      :value="item.value"
-                    />
-                  </select>
-                </div>
-                <div class="col-span-6 sm:col-span-3">
-                  <div class="flex">
-                    <div class="flex-auto">
-                      <label for="first-name" class="block text-sm font-medium text-gray-700">Expire Date</label>
-                      <input
-                        id="expireDate"
-                        v-model="expireDate"
-                        class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        type="date"
-                        name="expireDate"
-                        :min="minDate"
-                        :max="maxDate"
-                      >
-                    </div>
-                  </div>
+                  <input
+                    id="productName"
+                    v-model="productName"
+                    type="text"
+                    name="productName"
+                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md disabled:opacity-50"
+                    :disabled="true"
+                  >
                 </div>
                 <div class="col-span-6 sm:col-span-3">
                   <label for="quantity" class="block text-sm font-medium text-gray-700">Quantity</label>
@@ -95,85 +75,6 @@
               </div>
             </div>
             <div v-if="step == 3" class="px-4 py-3 bg-gray-50 text-right sm:px-6">
-              <button @click="submit()" type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
-                Submit
-              </button>
-              <button @click="reset()" type="reset" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-black bg-gray-300 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300">
-                Reset
-              </button>
-            </div>
-          </div>
-          <div v-if="step == 4" class="border-4 border-gray-200 rounded-lg p-2">
-            <div class="px-2 py-2 bg-white sm:p-6">
-              <div class="grid gap-4">
-                <div class="col-span-6 sm:col-span-3">
-                  <label for="barcode" class="block text-sm font-medium text-gray-700">Barcode</label>
-                  <input
-                    id="barcode"
-                    v-model="barcode"
-                    type="text"
-                    name="barcode"
-                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md disabled:opacity-50"
-                    :disabled="true"
-                  >
-                </div>
-                <div class="col-span-6 sm:col-span-3">
-                  <label for="productName" class="block text-sm font-medium text-gray-700">Product Name</label>
-                  <input
-                    id="productName"
-                    v-model="productName"
-                    type="text"
-                    name="productName"
-                    class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md disabled:opacity-50"
-                    :disabled="true"
-                  >
-                </div>
-                <div class="col-span-6 sm:col-span-3">
-                  <div class="flex">
-                    <div class="flex-auto">
-                      <label for="first-name" class="block text-sm font-medium text-gray-700">Expire Date</label>
-                      <input
-                        id="expireDate"
-                        v-model="expireDate"
-                        class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                        type="date"
-                        name="expireDate"
-                        :min="minDate"
-                        :max="maxDate"
-                      >
-                    </div>
-                  </div>
-                </div>
-                <div class="col-span-6 sm:col-span-3">
-                  <label for="quantity" class="block text-sm font-medium text-gray-700">Quantity</label>
-                  <div class="custom-number-input">
-                      <div class="flex flex-row h-10 w-full rounded-lg relative bg-transparent mt-1">
-                        <button
-                          data-action="decrement"
-                          class="bg-gray-300 text-gray-600 hover:text-gray-700 hover:bg-gray-400 h-full w-20 rounded-l cursor-pointer outline-none"
-                          @click="increment(-1)"
-                        >
-                          <span class="m-auto text-2xl font-thin">−</span>
-                        </button>
-                        <input
-                          type="number"
-                          class="outline-none focus:outline-none text-center w-full font-semibold text-md hover:text-black focus:text-black  md:text-basecursor-default flex items-center outline-none"
-                          name="quantity"
-                          v-model="quantity"
-                        />
-                        <button
-                          data-action="increment"
-                          class="bg-gray-300 text-gray-600 hover:text-gray-700 hover:bg-gray-400 h-full w-20 rounded-r cursor-pointer"
-                          @click="increment(1)"
-                        >
-                          <span class="m-auto text-2xl font-thin">+</span>
-                        </button>
-                      </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div v-if="step == 4" class="px-4 py-3 bg-gray-50 text-right sm:px-6">
               <button @click="submitExpiry()" type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
                 Submit
               </button>
@@ -187,6 +88,12 @@
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
             </svg>
             Add Complete
+          </div>
+          <div v-if="step == -1" class="border-4 border-gray-200 rounded-lg p-2 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-20 w-20 fill-current text-red-600 icon" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+            </svg>
+            เกิดข้อผิดพลาด : {{ errorMsg }}
           </div>
         </div>
         <!-- /End replace -->
@@ -205,7 +112,6 @@ export default {
   },
   data () {
     return {
-    //   text: '',
       step: 1,
       userID: null,
       barcode: '',
@@ -230,14 +136,15 @@ export default {
       sdkVersion: null,
       isInClient: null,
       isLoggedIn: null,
-      deviceOS: null
+      deviceOS: null,
+      errorMsg: ''
     }
   },
   async mounted () {
-    await liff.init({ liffId: '1656205141-7Eg1vzl6' })
+    await liff.init({ liffId: '1656205141-1QNAezQL' })
       .then(() => {
         if (!liff.isLoggedIn()) {
-          liff.login()
+        //   liff.login()
         } else {
           this.step++
         }
@@ -274,52 +181,59 @@ export default {
       }
     },
     async checkBarcode (barcode) {
-      await this.$axios.$get(`/api/product?barcode=${barcode}`).then((response) => {
+      await this.$axios.$get(`/api/expiry?barcode=${barcode}`).then((response) => {
         // console.log(response.data)
-        if (response.data == null) {
-          this.step = 3
-        } else {
+        if (response.data != null) {
           const firstItem = response.data[0]
-          this.barcode = firstItem.barcode
-          this.productName = firstItem.name
-          this.step = 4
+          this.barcode = firstItem.product.barcode
+          this.productName = firstItem.product.name
+          if (firstItem.quantity > 1) {
+            this.step = 3
+          } else {
+            this.deleteExpiry()
+          }
+        } else {
+          this.errorMsg = 'ไม่ได้สามารถเชื่อมต่อกับฐานข้อมูลได้'
+          this.step = -1
         }
       })
     },
-    async submit () {
+    // async submit () {
+    //   this.step = 1
+    //   await this.$axios.$post('/api/product/create', {
+    //     name: this.productName,
+    //     barcode: this.barcode,
+    //     expire_date: this.expireDate,
+    //     quantity: this.quantity
+    //   }).then((response) => {
+    //     this.step = 9
+    //     liff.closeWindow()
+    //   }).catch(function (error) {
+    //     if (error.response) {
+    //       console.log(error.response.data)
+    //       console.log(error.response.status)
+    //       console.log(error.response.headers)
+    //       this.errorMsg = error.response.data.message
+    //       this.step = -1
+    //     }
+    //   })
+    // },
+    async deleteExpiry () {
       this.step = 1
-      await this.$axios.$post('/api/product/create', {
-        name: this.productName,
-        barcode: this.barcode,
-        expire_date: this.expireDate,
-        quantity: this.quantity
+      self = this
+      await this.$axios.request('/api/expiry', {
+        data: {
+          barcode: self.barcode,
+          quantity: self.quantity
+        },
+        method: 'delete'
       }).then((response) => {
-        this.step = 9
+        self.step = 9
         liff.closeWindow()
       }).catch(function (error) {
         if (error.response) {
-          console.log(error.response.data)
-          console.log(error.response.status)
-          console.log(error.response.headers)
-          alert(`Error: ${error.response.data.message}`)
-        }
-      })
-    },
-    async submitExpiry () {
-      this.step = 1
-      await this.$axios.$post('/api/expiry', {
-        barcode: this.barcode,
-        expire_date: this.expireDate,
-        quantity: this.quantity
-      }).then((response) => {
-        this.step = 9
-        liff.closeWindow()
-      }).catch(function (error) {
-        if (error.response) {
-          console.log(error.response.data)
-          console.log(error.response.status)
-          console.log(error.response.headers)
-          alert(`Error: ${error.response.data.message}`)
+          self.errorMsg = error.response.data.message
+          self.step = -1
         }
       })
     },
@@ -331,7 +245,7 @@ export default {
       this.quantity = 1
     },
     login () {
-      liff.login({ redirectUri: 'https://ituyen.herokuapp.com/add-product' })
+      liff.login({ redirectUri: 'https://ituyen.herokuapp.com/remove-product' })
     }
   }
 }

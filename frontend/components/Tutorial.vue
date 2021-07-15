@@ -37,3 +37,15 @@
     </div>
   </div>
 </template>
+<script>
+export default ({
+  created () {
+    this.$axios.get('/api', {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/Json'
+      }
+    }).then(response => console.log(response))
+  }
+})
+</script>

@@ -95,13 +95,14 @@ func main() {
 
 	// Set up CORS middleware options
 	config := cors.Config{
-		AllowOrigins:     []string{"https://line-bot-ituyen.web.app", "https://ituyen.netlify.app"},
+		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 		AllowOriginFunc: func(origin string) bool {
-			return origin == "https://line-bot-ituyen.web.app"
+			return true
+			// return origin == "https://line-bot-ituyen.web.app"
 		},
 		MaxAge: 12 * time.Hour,
 	}
@@ -127,8 +128,18 @@ func main() {
 
 	productAPI := router.Group("/product")
 	{
+		productAPI.GET("", func(c *gin.Context) {
+			barcode := c.Query("barcode")
+			input := map[string]string{
+				"Barcode": barcode,
+			}
+			result := crud.List(input)
+			c.JSON(http.StatusOK, gin.H{
+				"data": result,
+			})
+		})
 		productAPI.POST("/create", func(c *gin.Context) {
-			var form models.ProductHasExpire
+			var form models.ProductHasExpiry
 			if c.ShouldBind(&form) == nil {
 				result := crud.AddData(form)
 				if result != nil {
@@ -146,12 +157,22 @@ func main() {
 		})
 	}
 
-	expireAPI := router.Group("/expire")
+	expiryAPI := router.Group("/expiry")
 	{
-		expireAPI.POST("", func(c *gin.Context) {
-			var form models.ProductHasExpire
+		expiryAPI.GET("", func(c *gin.Context) {
+			barcode := c.Query("barcode")
+			input := map[string]string{
+				"Barcode": barcode,
+			}
+			result := crud.ListExpiry(input)
+			c.JSON(http.StatusOK, gin.H{
+				"data": result,
+			})
+		})
+		expiryAPI.POST("", func(c *gin.Context) {
+			var form models.ProductHasExpiry
 			if c.ShouldBind(&form) == nil {
-				result := crud.AddExpire(form)
+				result := crud.AddExpiry(form)
 				if result != nil {
 					c.JSON(http.StatusUnprocessableEntity, gin.H{
 						"message": result.Error(),
@@ -166,10 +187,10 @@ func main() {
 			}
 			c.JSON(http.StatusCreated, nil)
 		})
-		expireAPI.PUT("", func(c *gin.Context) {
-			var form models.ProductHasExpire
+		expiryAPI.PUT("", func(c *gin.Context) {
+			var form models.ProductHasExpiry
 			if c.ShouldBind(&form) == nil {
-				result := crud.UpdateExpire(form)
+				result := crud.UpdateExpiry(form)
 				if result != nil {
 					c.JSON(http.StatusUnprocessableEntity, gin.H{
 						"message": result.Error(),
@@ -184,11 +205,11 @@ func main() {
 			}
 			c.JSON(http.StatusCreated, nil)
 		})
-		expireAPI.DELETE("", func(c *gin.Context) {
-			var form models.ProductHasExpire
+		expiryAPI.DELETE("", func(c *gin.Context) {
+			var form models.ProductHasExpiry
 			if c.ShouldBind(&form) == nil {
 				fmt.Printf("Delete barcode %v %v \n", form.Barcode, form.Quantity)
-				result := crud.RemoveExpire(form)
+				result := crud.RemoveExpiry(form)
 				if result != nil {
 					c.JSON(http.StatusUnprocessableEntity, gin.H{
 						"message": result.Error(),
