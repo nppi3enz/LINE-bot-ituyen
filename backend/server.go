@@ -140,7 +140,7 @@ func main() {
 			})
 		})
 		productAPI.POST("/create", func(c *gin.Context) {
-			var form models.ProductHasExpire
+			var form models.ProductHasExpiry
 			if c.ShouldBind(&form) == nil {
 				result := crud.AddData(form)
 				if result != nil {
@@ -158,12 +158,12 @@ func main() {
 		})
 	}
 
-	expireAPI := router.Group("/expire")
+	expireAPI := router.Group("/expiry")
 	{
 		expireAPI.POST("", func(c *gin.Context) {
-			var form models.ProductHasExpire
+			var form models.ProductHasExpiry
 			if c.ShouldBind(&form) == nil {
-				result := crud.AddExpire(form)
+				result := crud.AddExpiry(form)
 				if result != nil {
 					c.JSON(http.StatusUnprocessableEntity, gin.H{
 						"message": result.Error(),
@@ -179,9 +179,9 @@ func main() {
 			c.JSON(http.StatusCreated, nil)
 		})
 		expireAPI.PUT("", func(c *gin.Context) {
-			var form models.ProductHasExpire
+			var form models.ProductHasExpiry
 			if c.ShouldBind(&form) == nil {
-				result := crud.UpdateExpire(form)
+				result := crud.UpdateExpiry(form)
 				if result != nil {
 					c.JSON(http.StatusUnprocessableEntity, gin.H{
 						"message": result.Error(),
@@ -197,10 +197,10 @@ func main() {
 			c.JSON(http.StatusCreated, nil)
 		})
 		expireAPI.DELETE("", func(c *gin.Context) {
-			var form models.ProductHasExpire
+			var form models.ProductHasExpiry
 			if c.ShouldBind(&form) == nil {
 				fmt.Printf("Delete barcode %v %v \n", form.Barcode, form.Quantity)
-				result := crud.RemoveExpire(form)
+				result := crud.RemoveExpiry(form)
 				if result != nil {
 					c.JSON(http.StatusUnprocessableEntity, gin.H{
 						"message": result.Error(),
