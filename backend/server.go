@@ -4,6 +4,7 @@ import (
 	crud "backend/controller"
 	"backend/models"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -32,7 +33,135 @@ func connectLineBot() *linebot.Client {
 	}
 	return bot
 }
+func expiryDashboard() *linebot.FlexMessage {
+	result := crud.ListExpiry(make(map[string]string))
+	var outputMsg string
+	now := time.Now()
 
+	for _, val := range result {
+		dateExpiry := val.ExpireDate
+		diff := dateExpiry.Sub(now).Hours()
+		calculateDay := math.Ceil(diff / 24)
+
+		nameProduct := val.Product["name"]
+
+		var color string
+		var iconText string
+		if calculateDay > 10 {
+			color = "#aaaaaa"
+		} else if 7 < calculateDay && calculateDay <= 10 {
+			color = "#FFA900"
+			iconText = `{ "type": "icon", "url": "https://ituyen.herokuapp.com/alert-yellow.png" },`
+		} else if 4 < calculateDay && calculateDay <= 7 {
+			color = "#FF7600"
+			iconText = `{ "type": "icon", "url": "https://ituyen.herokuapp.com/alert-orange.png" },`
+		} else if 0 < calculateDay && calculateDay <= 4 {
+			color = "#CD113B"
+			iconText = `{ "type": "icon", "url": "https://ituyen.herokuapp.com/alert-red.png" },`
+		} else {
+			color = "#52006A"
+			iconText = `{ "type": "icon", "url": "https://ituyen.herokuapp.com/alert-purple.png" },`
+		}
+
+		outputMsg += `{
+			  "type": "box",
+			  "layout": "baseline",
+			  "contents": [
+				` + iconText + `
+				{
+				  "type": "text",
+				  "text": "` + nameProduct.(string) + `",
+				  "flex": 3,
+				  "weight": "bold",
+				  "margin": "sm",
+				  "wrap": true
+				},
+				{
+				  "type": "text",
+				  "text": "` + fmt.Sprint(calculateDay) + ` Days",
+				  "flex": 1,
+				  "size": "sm",
+				  "color": "` + color + `",
+				  "align": "end"
+				}
+			  ],
+			  "height": "30px"
+			},`
+	}
+	inputFmt := outputMsg[:len(outputMsg)-1]
+	currentTime := fmt.Sprintf("%02d/%02d/%d", now.Day(), now.Month(), now.Year())
+	jsonOutput := `{
+		"type": "bubble",
+		"size": "mega",
+		"header": {
+		  "type": "box",
+		  "layout": "vertical",
+		  "contents": [
+			{
+			  "type": "box",
+			  "layout": "vertical",
+			  "contents": [
+				{
+				  "type": "text",
+				  "text": "รายการสินค้าคงเหลือ",
+				  "color": "#ffffff",
+				  "size": "xl",
+				  "flex": 4,
+				  "weight": "bold"
+				},
+				{
+				  "type": "text",
+				  "text": "ประจำวันที่ ` + currentTime + `",
+				  "size": "sm",
+				  "color": "#ffffff66"
+				}
+			  ]
+			}
+		  ],
+		  "paddingAll": "20px",
+		  "backgroundColor": "#0367D3",
+		  "spacing": "md",
+		  "height": "90px",
+		  "paddingTop": "22px"
+		},
+		"body": {
+		  "type": "box",
+		  "layout": "vertical",
+		  "contents": [
+			` + inputFmt + `
+		  ]
+		},
+		"footer": {
+		  "type": "box",
+		  "layout": "vertical",
+		  "contents": [
+			{
+			  "type": "button",
+			  "action": {
+				"type": "uri",
+				"label": "นำสินค้าออก",
+				"uri": "https://liff.line.me/1656205141-1QNAezQL"
+			  },
+			  "style": "primary",
+			  "color": "#0367D3",
+			  "height": "sm"
+			}
+		  ]
+		}
+	  }`
+
+	// Unmarshal JSON
+	flexContainer, err := linebot.UnmarshalFlexMessageJSON([]byte(jsonOutput))
+	if err != nil {
+		log.Println(err)
+	}
+
+	// New Flex Message
+	return linebot.NewFlexMessage("เช็ควันหมดอายุของวันนี้", flexContainer)
+}
+func expiryBroadcast() {
+
+}
 func lineBot(c *gin.Context) {
 	bot := connectBot
 	events, err := bot.ParseRequest(c.Request)
@@ -58,197 +187,13 @@ func lineBot(c *gin.Context) {
 					}
 				} else if message.Text == "carousel" {
 				} else if message.Text == "เช็ควันหมดอายุ" {
-					// Unmarshal JSON
-					flexContainer, err := linebot.UnmarshalFlexMessageJSON([]byte(`{
-						"type": "bubble",
-						"size": "mega",
-						"header": {
-						  "type": "box",
-						  "layout": "vertical",
-						  "contents": [
-							{
-							  "type": "box",
-							  "layout": "vertical",
-							  "contents": [
-								{
-								  "type": "text",
-								  "text": "รายการสินค้าคงเหลือ",
-								  "color": "#ffffff",
-								  "size": "xl",
-								  "flex": 4,
-								  "weight": "bold"
-								},
-								{
-								  "type": "text",
-								  "text": "ประจำวันที่ 15/07/2021",
-								  "size": "sm",
-								  "color": "#ffffff66"
-								}
-							  ]
-							}
-						  ],
-						  "paddingAll": "20px",
-						  "backgroundColor": "#0367D3",
-						  "spacing": "md",
-						  "height": "90px",
-						  "paddingTop": "22px"
-						},
-						"body": {
-						  "type": "box",
-						  "layout": "vertical",
-						  "contents": [
-							{
-							  "type": "box",
-							  "layout": "baseline",
-							  "contents": [
-								{
-								  "type": "icon",
-								  "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/restaurant_regular_32.png"
-								},
-								{
-								  "type": "text",
-								  "text": "รายการสินค้าชิ้นที่ 1",
-								  "flex": 0,
-								  "weight": "bold",
-								  "margin": "sm"
-								},
-								{
-								  "type": "text",
-								  "text": "1 Days",
-								  "size": "sm",
-								  "color": "#CD113B",
-								  "align": "end"
-								}
-							  ],
-							  "height": "30px"
-							},
-							{
-							  "type": "box",
-							  "layout": "baseline",
-							  "contents": [
-								{
-								  "type": "icon",
-								  "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/restaurant_regular_32.png"
-								},
-								{
-								  "type": "text",
-								  "text": "รายการสินค้าชิ้นที่ 2",
-								  "flex": 0,
-								  "weight": "bold",
-								  "margin": "sm"
-								},
-								{
-								  "type": "text",
-								  "text": "3 Days",
-								  "size": "sm",
-								  "color": "#FF7600",
-								  "align": "end"
-								}
-							  ],
-							  "height": "30px"
-							},
-							{
-							  "type": "box",
-							  "layout": "baseline",
-							  "contents": [
-								{
-								  "type": "icon",
-								  "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/restaurant_regular_32.png"
-								},
-								{
-								  "type": "text",
-								  "text": "รายการสินค้าชิ้นที่ 3",
-								  "flex": 0,
-								  "weight": "bold",
-								  "margin": "sm"
-								},
-								{
-								  "type": "text",
-								  "text": "5 Days",
-								  "size": "sm",
-								  "color": "#52006A",
-								  "align": "end"
-								}
-							  ],
-							  "height": "30px"
-							},
-							{
-							  "type": "box",
-							  "layout": "baseline",
-							  "contents": [
-								{
-								  "type": "text",
-								  "text": "รายการสินค้าชิ้นที่ 4",
-								  "flex": 0,
-								  "weight": "bold",
-								  "margin": "sm"
-								},
-								{
-								  "type": "text",
-								  "text": "10 Days",
-								  "size": "sm",
-								  "color": "#aaaaaa",
-								  "align": "end"
-								}
-							  ],
-							  "height": "30px"
-							},
-							{
-							  "type": "box",
-							  "layout": "baseline",
-							  "contents": [
-								{
-								  "type": "text",
-								  "text": "รายการสินค้าชิ้นที่ 5",
-								  "flex": 0,
-								  "weight": "bold",
-								  "margin": "sm"
-								},
-								{
-								  "type": "text",
-								  "text": "30 Days",
-								  "size": "sm",
-								  "color": "#aaaaaa",
-								  "align": "end"
-								}
-							  ],
-							  "height": "30px"
-							}
-						  ]
-						},
-						"footer": {
-						  "type": "box",
-						  "layout": "vertical",
-						  "contents": [
-							{
-							  "type": "button",
-							  "action": {
-								"type": "uri",
-								"label": "นำสินค้าออก",
-								"uri": "https://liff.line.me/1656205141-1QNAezQL"
-							  },
-							  "style": "primary",
-							  "color": "#0367D3",
-							  "height": "sm"
-							}
-						  ]
-						}
-					  }`))
-					if err != nil {
-						log.Println(err)
-					}
-
-					// New Flex Message
-					flexMessage := linebot.NewFlexMessage("เช็ควันหมดอายุของวันนี้", flexContainer)
+					flexMessage := expiryDashboard()
 
 					// Reply Message
 					if _, err = bot.ReplyMessage(event.ReplyToken, flexMessage).Do(); err != nil {
 						log.Print(err)
 					}
 				}
-				// if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(message.Text)).Do(); err != nil {
-				// 	log.Print(err)
-				// }
 			case *linebot.StickerMessage:
 				replyMessage := fmt.Sprintf(
 					"sticker id is %s, stickerResourceType is %s", message.StickerID, message.StickerResourceType)
@@ -258,23 +203,29 @@ func lineBot(c *gin.Context) {
 			}
 		}
 	}
+}
+func cronJob(c *gin.Context) {
+	bot := connectBot
+	flexMessage := expiryDashboard()
+	var err error
+
+	// Reply Message
+	if _, err = bot.BroadcastMessage(flexMessage).Do(); err != nil {
+		log.Print(err)
+	}
 	c.JSON(http.StatusOK, gin.H{
-		"message": "ok",
+		"result": "complete",
 	})
 }
 
 func main() {
 
-	e := models.Product{
-		Name:    "Sam",
-		Barcode: "12312312312321312",
-	}
-	e.LeavesRemaining()
-	// -------- gin router
-	// app := App{}
-	// app.Init()
-	// app.Run()
-	// app.addProduct()
+	// e := models.Product{
+	// 	Name:    "Sam",
+	// 	Barcode: "12312312312321312",
+	// }
+	// e.LeavesRemaining()
+
 	router := gin.Default()
 
 	// Set up CORS middleware options
@@ -307,6 +258,8 @@ func main() {
 	})
 
 	connectBot = connectLineBot()
+
+	router.GET("/cronjob", cronJob)
 
 	router.POST("/callback", lineBot)
 

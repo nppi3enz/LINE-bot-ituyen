@@ -294,6 +294,12 @@ export default {
         expire_date: this.expireDate,
         quantity: this.quantity
       }).then((response) => {
+        liff.sendMessages([
+          {
+            type: 'text',
+            text: 'เช็ควันหมดอายุ'
+          }
+        ])
         this.step = 9
         liff.closeWindow()
       }).catch(function (error) {
@@ -312,6 +318,12 @@ export default {
         expire_date: this.expireDate,
         quantity: this.quantity
       }).then((response) => {
+        liff.sendMessages([
+          {
+            type: 'text',
+            text: 'เช็ควันหมดอายุ'
+          }
+        ])
         this.step = 9
         liff.closeWindow()
       }).catch(function (error) {
