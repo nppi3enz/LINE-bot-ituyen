@@ -60,10 +60,10 @@ func List(p map[string]string) []models.Product {
 	col := client.Collection("products")
 
 	var query firestore.Query
+	query = col.Query
 	if p["Barcode"] != "" {
 		query = col.Where("barcode", "==", p["Barcode"])
 	}
-	query = col.Query
 
 	docs := query.Documents(ctx)
 
