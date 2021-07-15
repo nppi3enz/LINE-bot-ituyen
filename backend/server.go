@@ -58,37 +58,190 @@ func lineBot(c *gin.Context) {
 					}
 				} else if message.Text == "carousel" {
 				} else if message.Text == "เช็ควันหมดอายุ" {
-					// Make Contents
-					var contents []linebot.FlexComponent
-					text := linebot.TextComponent{
-						Type:   linebot.FlexComponentTypeText,
-						Text:   "Brown Cafe",
-						Weight: "bold",
-						Size:   linebot.FlexTextSizeTypeXl,
+					// Unmarshal JSON
+					flexContainer, err := linebot.UnmarshalFlexMessageJSON([]byte(`{
+						"type": "bubble",
+						"size": "mega",
+						"header": {
+						  "type": "box",
+						  "layout": "vertical",
+						  "contents": [
+							{
+							  "type": "box",
+							  "layout": "vertical",
+							  "contents": [
+								{
+								  "type": "text",
+								  "text": "รายการสินค้าคงเหลือ",
+								  "color": "#ffffff",
+								  "size": "xl",
+								  "flex": 4,
+								  "weight": "bold"
+								},
+								{
+								  "type": "text",
+								  "text": "ประจำวันที่ 15/07/2021",
+								  "size": "sm",
+								  "color": "#ffffff66"
+								}
+							  ]
+							}
+						  ],
+						  "paddingAll": "20px",
+						  "backgroundColor": "#0367D3",
+						  "spacing": "md",
+						  "height": "90px",
+						  "paddingTop": "22px"
+						},
+						"body": {
+						  "type": "box",
+						  "layout": "vertical",
+						  "contents": [
+							{
+							  "type": "box",
+							  "layout": "baseline",
+							  "contents": [
+								{
+								  "type": "icon",
+								  "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/restaurant_regular_32.png"
+								},
+								{
+								  "type": "text",
+								  "text": "รายการสินค้าชิ้นที่ 1",
+								  "flex": 0,
+								  "weight": "bold",
+								  "margin": "sm"
+								},
+								{
+								  "type": "text",
+								  "text": "1 Days",
+								  "size": "sm",
+								  "color": "#CD113B",
+								  "align": "end"
+								}
+							  ],
+							  "height": "30px"
+							},
+							{
+							  "type": "box",
+							  "layout": "baseline",
+							  "contents": [
+								{
+								  "type": "icon",
+								  "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/restaurant_regular_32.png"
+								},
+								{
+								  "type": "text",
+								  "text": "รายการสินค้าชิ้นที่ 2",
+								  "flex": 0,
+								  "weight": "bold",
+								  "margin": "sm"
+								},
+								{
+								  "type": "text",
+								  "text": "3 Days",
+								  "size": "sm",
+								  "color": "#FF7600",
+								  "align": "end"
+								}
+							  ],
+							  "height": "30px"
+							},
+							{
+							  "type": "box",
+							  "layout": "baseline",
+							  "contents": [
+								{
+								  "type": "icon",
+								  "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/restaurant_regular_32.png"
+								},
+								{
+								  "type": "text",
+								  "text": "รายการสินค้าชิ้นที่ 3",
+								  "flex": 0,
+								  "weight": "bold",
+								  "margin": "sm"
+								},
+								{
+								  "type": "text",
+								  "text": "5 Days",
+								  "size": "sm",
+								  "color": "#52006A",
+								  "align": "end"
+								}
+							  ],
+							  "height": "30px"
+							},
+							{
+							  "type": "box",
+							  "layout": "baseline",
+							  "contents": [
+								{
+								  "type": "text",
+								  "text": "รายการสินค้าชิ้นที่ 4",
+								  "flex": 0,
+								  "weight": "bold",
+								  "margin": "sm"
+								},
+								{
+								  "type": "text",
+								  "text": "10 Days",
+								  "size": "sm",
+								  "color": "#aaaaaa",
+								  "align": "end"
+								}
+							  ],
+							  "height": "30px"
+							},
+							{
+							  "type": "box",
+							  "layout": "baseline",
+							  "contents": [
+								{
+								  "type": "text",
+								  "text": "รายการสินค้าชิ้นที่ 5",
+								  "flex": 0,
+								  "weight": "bold",
+								  "margin": "sm"
+								},
+								{
+								  "type": "text",
+								  "text": "30 Days",
+								  "size": "sm",
+								  "color": "#aaaaaa",
+								  "align": "end"
+								}
+							  ],
+							  "height": "30px"
+							}
+						  ]
+						},
+						"footer": {
+						  "type": "box",
+						  "layout": "vertical",
+						  "contents": [
+							{
+							  "type": "button",
+							  "action": {
+								"type": "uri",
+								"label": "นำสินค้าออก",
+								"uri": "https://liff.line.me/1656205141-1QNAezQL"
+							  },
+							  "style": "primary",
+							  "color": "#0367D3",
+							  "height": "sm"
+							}
+						  ]
+						}
+					  }`))
+					if err != nil {
+						log.Println(err)
 					}
-					contents = append(contents, &text)
-					// Make Hero
-					hero := linebot.ImageComponent{
-						Type:        linebot.FlexComponentTypeImage,
-						URL:         "https://scdn.line-apps.com/n/channel_devcenter/img/fx/01_1_cafe.png",
-						Size:        "full",
-						AspectRatio: linebot.FlexImageAspectRatioType20to13,
-						AspectMode:  linebot.FlexImageAspectModeTypeCover,
-						Action:      linebot.NewMessageAction("left", "left clicked"),
-					}
-					// Make Body
-					body := linebot.BoxComponent{
-						Type:     linebot.FlexComponentTypeBox,
-						Layout:   linebot.FlexBoxLayoutTypeVertical,
-						Contents: contents,
-					}
-					// Build Container
-					bubble := linebot.BubbleContainer{
-						Type: linebot.FlexContainerTypeBubble,
-						Hero: &hero,
-						Body: &body,
-					}
-					flexMessage := linebot.NewFlexMessage("เช็ควันหมดอายุ", &bubble)
+
+					// New Flex Message
+					flexMessage := linebot.NewFlexMessage("เช็ควันหมดอายุของวันนี้", flexContainer)
+
+					// Reply Message
 					if _, err = bot.ReplyMessage(event.ReplyToken, flexMessage).Do(); err != nil {
 						log.Print(err)
 					}
