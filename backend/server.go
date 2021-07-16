@@ -89,7 +89,8 @@ func expiryDashboard() *linebot.FlexMessage {
 				  "align": "end"
 				}
 			  ],
-			  "height": "30px"
+			  "paddingTop": "5px",
+			  "paddingBottom": "5px"
 			},`
 	}
 	inputFmt := outputMsg[:len(outputMsg)-1]
