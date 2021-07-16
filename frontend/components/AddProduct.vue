@@ -343,7 +343,7 @@ export default {
       this.quantity = 1
     },
     login () {
-      liff.login({ redirectUri: 'https://ituyen.herokuapp.com/add-product' })
+      liff.login()
     }
   }
 }
