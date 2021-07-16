@@ -144,7 +144,7 @@ export default {
     await liff.init({ liffId: '1656205141-1QNAezQL' })
       .then(() => {
         if (!liff.isLoggedIn()) {
-        //   liff.login()
+          liff.login()
         } else {
           this.step++
         }
