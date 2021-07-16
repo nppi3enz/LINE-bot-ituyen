@@ -82,7 +82,7 @@ func expiryDashboard() *linebot.FlexMessage {
 				},
 				{
 				  "type": "text",
-				  "text": "` + fmt.Sprint(calculateDay) + ` Days",
+				  "text": "` + fmt.Sprint(calculateDay) + ` วัน",
 				  "flex": 1,
 				  "size": "sm",
 				  "color": "` + color + `",
