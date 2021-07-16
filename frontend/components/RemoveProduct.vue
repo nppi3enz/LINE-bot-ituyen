@@ -228,6 +228,12 @@ export default {
         },
         method: 'delete'
       }).then((response) => {
+        liff.sendMessages([
+          {
+            type: 'text',
+            text: 'เช็ควันหมดอายุ'
+          }
+        ])
         self.step = 9
         liff.closeWindow()
       }).catch(function (error) {

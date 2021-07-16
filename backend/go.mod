@@ -9,6 +9,7 @@ require (
 	firebase.google.com/go v3.13.0+incompatible
 	github.com/gin-contrib/cors v1.3.1 // indirect
 	github.com/gin-gonic/gin v1.7.2
+	github.com/go-co-op/gocron v1.6.2 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/itsjamie/gin-cors v0.0.0-20160420130702-97b4a9da7933 // indirect
 	github.com/joho/godotenv v1.3.0

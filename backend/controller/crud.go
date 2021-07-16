@@ -37,25 +37,6 @@ func Init(ctx context.Context) *firestore.Client {
 	return client
 }
 
-// func Home(c *gin.Context) {
-// 	ProductsData := []models.Product{}
-// 	// client := initial.Init(ctx)
-// 	iter := client.Collection("products").Documents(ctx)
-// 	for {
-// 		ProductData := models.Product{}
-// 		_, err := iter.Next()
-// 		if err == iterator.Done {
-// 			break
-// 		}
-// 		if err != nil {
-// 			return err
-// 		}
-
-// 		// mapstructure.Decode(doc.Data(), &IncomeData)
-// 		ProductsData = append(ProductsData, ProductData)
-// 	}
-// 	return c.JSON(http.StatusOK, ProductsData)
-// }
 func List(p map[string]string) []models.Product {
 	col := client.Collection("products")
 
@@ -159,6 +140,7 @@ func ListExpiry(p map[string]string) []models.Expiry {
 	if p["Barcode"] != "" {
 		query = col.Where("product.barcode", "==", p["Barcode"])
 	}
+	query = col.OrderBy("expireDate", firestore.Asc)
 
 	docs := query.Documents(ctx)
 
@@ -172,7 +154,6 @@ func ListExpiry(p map[string]string) []models.Expiry {
 		// 	return []
 		// }
 		var b models.Expiry
-		fmt.Println(b)
 		if err := doc.DataTo(&b); err != nil {
 			// Handle error, possibly by returning the error
 		}
