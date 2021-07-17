@@ -120,6 +120,7 @@ export default {
       hasExpired: true,
       expireDate: '',
       quantity: 1,
+      currentQuantity: 0,
       pickerOptions: {
         disabledDate (time) {
           return time.getTime() < Date.now()
@@ -187,6 +188,7 @@ export default {
           const firstItem = response.data[0]
           this.barcode = firstItem.product.barcode
           this.productName = firstItem.product.name
+          this.currentQuantity = firstItem.quantity
           if (firstItem.quantity > 1) {
             this.step = 3
           } else {
@@ -249,7 +251,7 @@ export default {
       await this.$axios.request('/api/expiry', {
         data: {
           barcode: self.barcode,
-          quantity: self.quantity
+          quantity: this.currentQuantity - self.quantity
         },
         method: 'delete'
       }).then((response) => {
