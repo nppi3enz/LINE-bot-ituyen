@@ -226,7 +226,7 @@ export default {
       await this.$axios.request('/api/expiry', {
         data: {
           barcode: self.barcode,
-          quantity: self.quantity
+          quantity: this.currentQuantity - self.quantity
         },
         method: 'put'
       }).then((response) => {
@@ -251,7 +251,7 @@ export default {
       await this.$axios.request('/api/expiry', {
         data: {
           barcode: self.barcode,
-          quantity: this.currentQuantity - self.quantity
+          quantity: self.quantity
         },
         method: 'delete'
       }).then((response) => {
