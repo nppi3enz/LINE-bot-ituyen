@@ -43,7 +43,11 @@ func expiryDashboard() *linebot.FlexMessage {
 		diff := dateExpiry.Sub(now).Hours()
 		calculateDay := math.Ceil(diff / 24)
 
-		nameProduct := val.Product["name"]
+		nameProduct := val.Product["name"].(string)
+
+		if val.Quantity > 1 {
+			nameProduct = `x` + fmt.Sprint(val.Quantity) + ` ` + nameProduct
+		}
 
 		var color string
 		var iconText string
@@ -70,7 +74,7 @@ func expiryDashboard() *linebot.FlexMessage {
 				` + iconText + `
 				{
 				  "type": "text",
-				  "text": "` + nameProduct.(string) + `",
+				  "text": "` + nameProduct + `",
 				  "flex": 3,
 				  "weight": "bold",
 				  "margin": "sm",
@@ -78,14 +82,15 @@ func expiryDashboard() *linebot.FlexMessage {
 				},
 				{
 				  "type": "text",
-				  "text": "` + fmt.Sprint(calculateDay) + ` Days",
+				  "text": "` + fmt.Sprint(calculateDay) + ` วัน",
 				  "flex": 1,
 				  "size": "sm",
 				  "color": "` + color + `",
 				  "align": "end"
 				}
 			  ],
-			  "height": "30px"
+			  "paddingTop": "5px",
+			  "paddingBottom": "5px"
 			},`
 	}
 	inputFmt := outputMsg[:len(outputMsg)-1]

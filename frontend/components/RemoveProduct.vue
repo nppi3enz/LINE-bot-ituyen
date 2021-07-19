@@ -48,34 +48,34 @@
                 <div class="col-span-6 sm:col-span-3">
                   <label for="quantity" class="block text-sm font-medium text-gray-700">Quantity</label>
                   <div class="custom-number-input">
-                      <div class="flex flex-row h-10 w-full rounded-lg relative bg-transparent mt-1">
-                        <button
-                          data-action="decrement"
-                          class="bg-gray-300 text-gray-600 hover:text-gray-700 hover:bg-gray-400 h-full w-20 rounded-l cursor-pointer outline-none"
-                          @click="increment(-1)"
-                        >
-                          <span class="m-auto text-2xl font-thin">−</span>
-                        </button>
-                        <input
-                          type="number"
-                          class="outline-none focus:outline-none text-center w-full font-semibold text-md hover:text-black focus:text-black  md:text-basecursor-default flex items-center outline-none"
-                          name="quantity"
-                          v-model="quantity"
-                        />
-                        <button
-                          data-action="increment"
-                          class="bg-gray-300 text-gray-600 hover:text-gray-700 hover:bg-gray-400 h-full w-20 rounded-r cursor-pointer"
-                          @click="increment(1)"
-                        >
-                          <span class="m-auto text-2xl font-thin">+</span>
-                        </button>
-                      </div>
+                    <div class="flex flex-row h-10 w-full rounded-lg relative bg-transparent mt-1">
+                      <button
+                        data-action="decrement"
+                        class="bg-gray-300 text-gray-600 hover:text-gray-700 hover:bg-gray-400 h-full w-20 rounded-l cursor-pointer outline-none"
+                        @click="increment(-1)"
+                      >
+                        <span class="m-auto text-2xl font-thin">−</span>
+                      </button>
+                      <input
+                        type="number"
+                        class="outline-none focus:outline-none text-center w-full font-semibold text-md hover:text-black focus:text-black  md:text-basecursor-default flex items-center outline-none"
+                        name="quantity"
+                        v-model="quantity"
+                      />
+                      <button
+                        data-action="increment"
+                        class="bg-gray-300 text-gray-600 hover:text-gray-700 hover:bg-gray-400 h-full w-20 rounded-r cursor-pointer"
+                        @click="increment(1)"
+                      >
+                        <span class="m-auto text-2xl font-thin">+</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
             <div v-if="step == 3" class="px-4 py-3 bg-gray-50 text-right sm:px-6">
-              <button @click="submitExpiry()" type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
+              <button @click="updateExpiry()" type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">
                 Submit
               </button>
               <button @click="reset()" type="reset" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-black bg-gray-300 hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-300">
@@ -120,6 +120,7 @@ export default {
       hasExpired: true,
       expireDate: '',
       quantity: 1,
+      currentQuantity: 0,
       pickerOptions: {
         disabledDate (time) {
           return time.getTime() < Date.now()
@@ -144,7 +145,7 @@ export default {
     await liff.init({ liffId: '1656205141-1QNAezQL' })
       .then(() => {
         if (!liff.isLoggedIn()) {
-        //   liff.login()
+          liff.login()
         } else {
           this.step++
         }
@@ -187,6 +188,7 @@ export default {
           const firstItem = response.data[0]
           this.barcode = firstItem.product.barcode
           this.productName = firstItem.product.name
+          this.currentQuantity = firstItem.quantity
           if (firstItem.quantity > 1) {
             this.step = 3
           } else {
@@ -218,6 +220,31 @@ export default {
     //     }
     //   })
     // },
+    async updateExpiry () {
+      this.step = 1
+      self = this
+      await this.$axios.request('/api/expiry', {
+        data: {
+          barcode: self.barcode,
+          quantity: this.currentQuantity - self.quantity
+        },
+        method: 'put'
+      }).then((response) => {
+        liff.sendMessages([
+          {
+            type: 'text',
+            text: 'เช็ควันหมดอายุ'
+          }
+        ])
+        self.step = 9
+        liff.closeWindow()
+      }).catch(function (error) {
+        if (error.response) {
+          self.errorMsg = error.response.data.message
+          self.step = -1
+        }
+      })
+    },
     async deleteExpiry () {
       this.step = 1
       self = this
@@ -251,7 +278,7 @@ export default {
       this.quantity = 1
     },
     login () {
-      liff.login({ redirectUri: 'https://ituyen.herokuapp.com/remove-product' })
+      liff.login()
     }
   }
 }

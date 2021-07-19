@@ -131,16 +131,15 @@ func AddData(p models.ProductHasExpiry) error {
 // 	// _, _, err := client.Collection("income-v2").Add(ctx, IncomesData)
 // }
 func ListExpiry(p map[string]string) []models.Expiry {
-	// result := client.Collection("expiry").Where("product.barcode", "==", p.Barcode).Documents(ctx)
-
 	col := client.Collection("expiry")
 
 	var query firestore.Query
 	query = col.Query
 	if p["Barcode"] != "" {
 		query = col.Where("product.barcode", "==", p["Barcode"])
+	} else {
+		query = col.OrderBy("expireDate", firestore.Asc)
 	}
-	query = col.OrderBy("expireDate", firestore.Asc)
 
 	docs := query.Documents(ctx)
 
@@ -154,6 +153,7 @@ func ListExpiry(p map[string]string) []models.Expiry {
 		// 	return []
 		// }
 		var b models.Expiry
+		fmt.Println(b)
 		if err := doc.DataTo(&b); err != nil {
 			// Handle error, possibly by returning the error
 		}
