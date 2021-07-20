@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type Expiry struct {
 	ExpireDate time.Time              `json:"expire_date"`
