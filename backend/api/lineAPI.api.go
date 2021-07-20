@@ -17,8 +17,10 @@ var connectBot *linebot.Client
 var client *firestore.Client
 var ctx context.Context
 
-func SetupLineCallback(router *gin.Engine) {
+func SetupLineCallback(router *gin.Engine, c *firestore.Client, cx context.Context) {
 	connectBot = connectLineBot()
+	client = c
+	ctx = cx
 
 	router.POST("/callback", lineBot)
 }
@@ -184,12 +186,7 @@ func lineBot(c *gin.Context) {
 		if event.Type == linebot.EventTypeMessage {
 			switch message := event.Message.(type) {
 			case *linebot.TextMessage:
-				if message.Text == "hello" {
-					if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("สวัสดีค่ะ")).Do(); err != nil {
-						log.Print(err)
-					}
-				} else if message.Text == "carousel" {
-				} else if message.Text == "เช็ควันหมดอายุ" {
+				if message.Text == "เช็ควันหมดอายุ" {
 					flexMessage := expiryDashboard()
 
 					// Reply Message
@@ -197,12 +194,7 @@ func lineBot(c *gin.Context) {
 						log.Print(err)
 					}
 				}
-			case *linebot.StickerMessage:
-				replyMessage := fmt.Sprintf(
-					"sticker id is %s, stickerResourceType is %s", message.StickerID, message.StickerResourceType)
-				if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(replyMessage)).Do(); err != nil {
-					log.Print(err)
-				}
+				break
 			}
 		}
 	}

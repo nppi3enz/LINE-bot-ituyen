@@ -22,6 +22,6 @@ func Setup(router *gin.Engine) {
 	SetupCronjob(router)
 	SetupExpiryAPI(router, client, ctx)
 	SetupProductAPI(router, client, ctx)
-	SetupLineCallback(router)
+	SetupLineCallback(router, client, ctx)
 	// connectLineBot(client, ctx)
 }
