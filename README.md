@@ -1,7 +1,13 @@
 # iTUYEN
 
-Expiry reminder product  
-Sorry this’s private project. I can’t share private line ID :(  
+It's my side projects  
+Expiry reminder product with Line Bot Application
+- Frontend : Vue.js
+- Backend : Golang
+- Database : Firebase
+
 See demo program below here  
 
 ![screen shot](screenshot.gif)
+
+P.S. Cloning my code Coming soon...
