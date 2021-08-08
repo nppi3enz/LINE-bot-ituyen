@@ -306,7 +306,7 @@ func lineBot(c *gin.Context) {
 					result := RemoveExpiry(p, client, ctx)
 					if result != nil {
 						log.Print(result)
-						if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("เกิดข้อผิดพลาด โปรดรออีกครั้ง")).Do(); err != nil {
+						if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("เกิดข้อผิดพลาด โปรดลองอีกครั้ง")).Do(); err != nil {
 							log.Print(err)
 						}
 						return
