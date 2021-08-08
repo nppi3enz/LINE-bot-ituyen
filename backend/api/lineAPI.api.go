@@ -301,7 +301,7 @@ func lineBot(c *gin.Context) {
 					d := strings.Split(message.Text, "|")
 					barcode := d[2]
 
-					p := models.ProductHasExpiry{Barcode: barcode}
+					p := models.ProductHasExpiry{Barcode: barcode, Quantity: 1}
 
 					result := RemoveExpiry(p, client, ctx)
 					if result != nil {
