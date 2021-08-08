@@ -1,12 +1,14 @@
 package api
 
 import (
+	"backend/models"
 	"context"
 	"fmt"
 	"log"
 	"math"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/firestore"
@@ -172,8 +174,6 @@ func deleteManual() *linebot.FlexMessage {
 	var outputMsg string
 
 	for index, val := range result {
-		fmt.Println(result)
-		productID := val.Product["ID"].(string)
 		nameProduct := val.Product["name"].(string)
 
 		if val.Quantity > 1 {
@@ -200,7 +200,7 @@ func deleteManual() *linebot.FlexMessage {
 			"action": {
 				"type": "message",
 				"label": "action",
-				"text": "ลบ|` + strconv.Itoa(index+1) + `|` + productID + `"
+				"text": "ลบ|` + strconv.Itoa(index+1) + `|` + val.Product["barcode"].(string) + `"
 			}
 		  },`
 	}
@@ -297,29 +297,24 @@ func lineBot(c *gin.Context) {
 					if _, err = bot.ReplyMessage(event.ReplyToken, flexMessage).Do(); err != nil {
 						log.Print(err)
 					}
-				} else if message.Text[:3] == "ลบ|" {
-					if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(`ลบสินค้าเรียบร้อย`)).Do(); err != nil {
+				} else if message.Text[:7] == "ลบ|" {
+					d := strings.Split(message.Text, "|")
+					barcode := d[2]
+
+					p := models.ProductHasExpiry{Barcode: barcode}
+
+					result := RemoveExpiry(p, client, ctx)
+					if result != nil {
+						log.Print(result)
+						if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("เกิดข้อผิดพลาด โปรดรออีกครั้ง")).Do(); err != nil {
+							log.Print(err)
+						}
+						return
+					}
+					if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(`ลบสินค้า [`+d[1]+`] เรียบร้อย`)).Do(); err != nil {
 						log.Print(err)
 					}
-
-					// d := strings.Split(message.Text, "|")
-					// idDelete := d[2]
-
-					// p := models.ProductHasExpiry{ID: idDelete}
-
-					// result := RemoveExpiry(p, client, ctx)
-					// if result != nil {
-					// 	if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("เกิดข้อผิดพลาด โปรดรออีกครั้ง")).Do(); err != nil {
-					// 		log.Print(err)
-					// 	}
-					// 	return
-					// }
-					// if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(`ลบสินค้า `+d[1]+` เรียบร้อย`)).Do(); err != nil {
-					// 	log.Print(err)
-					// }
 				} else {
-					fmt.Println(message.Text[:6])
-					fmt.Println(message.Text[:6] == "ลบ|")
 					fmt.Println(message.Text)
 				}
 				break
