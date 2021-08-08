@@ -1,11 +1,14 @@
 package api
 
 import (
+	"backend/models"
 	"context"
 	"fmt"
 	"log"
 	"math"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"cloud.google.com/go/firestore"
@@ -91,9 +94,7 @@ func expiryDashboard() *linebot.FlexMessage {
 				  "color": "` + color + `",
 				  "align": "end"
 				}
-			  ],
-			  "paddingTop": "5px",
-			  "paddingBottom": "5px"
+			  ]
 			},`
 	}
 	inputFmt := outputMsg[:len(outputMsg)-1]
@@ -137,7 +138,8 @@ func expiryDashboard() *linebot.FlexMessage {
 		  "layout": "vertical",
 		  "contents": [
 			` + inputFmt + `
-		  ]
+		  ],
+		  "spacing": "md"
 		},
 		"footer": {
 		  "type": "box",
@@ -146,9 +148,9 @@ func expiryDashboard() *linebot.FlexMessage {
 			{
 			  "type": "button",
 			  "action": {
-				"type": "uri",
-				"label": "นำสินค้าออก",
-				"uri": "https://liff.line.me/1656205141-1QNAezQL"
+				"type": "message",
+				"label": "นำสินค้าออกด้วยมือ",
+				"text": "นำสินค้าออกด้วยมือ"
 			  },
 			  "style": "primary",
 			  "color": "#0367D3",
@@ -166,6 +168,101 @@ func expiryDashboard() *linebot.FlexMessage {
 
 	// New Flex Message
 	return linebot.NewFlexMessage("เช็ควันหมดอายุของวันนี้", flexContainer)
+}
+func deleteManual() *linebot.FlexMessage {
+	result := ListExpiry(make(map[string]string), client, ctx)
+	var outputMsg string
+
+	for index, val := range result {
+		nameProduct := val.Product["name"].(string)
+
+		if val.Quantity > 1 {
+			nameProduct = `x` + fmt.Sprint(val.Quantity) + ` ` + nameProduct
+		}
+
+		outputMsg += `{
+			"type": "box",
+			"layout": "horizontal",
+			"contents": [
+			  {
+				"type": "text",
+				"text": "[` + strconv.Itoa(index+1) + `] ",
+				"color": "#FF6B6E",
+				"flex": 0
+			  },
+			  {
+				"type": "text",
+				"text": "` + nameProduct + `",
+				"color": "#555555",
+				"wrap": true
+			  }
+			],
+			"action": {
+				"type": "message",
+				"label": "action",
+				"text": "ลบ|` + strconv.Itoa(index+1) + `|` + val.Product["barcode"].(string) + `"
+			}
+		  },`
+	}
+	inputFmt := outputMsg[:len(outputMsg)-1]
+
+	jsonOutput := `
+	{
+		"type": "bubble",
+		"header": {
+			"type": "box",
+			"layout": "vertical",
+			"contents": [
+			{
+				"type": "box",
+				"layout": "vertical",
+				"contents": [
+				{
+					"type": "text",
+					"text": "เลือกรายการที่ต้องการลบ",
+					"color": "#ffffff",
+					"size": "xl",
+					"flex": 4,
+					"weight": "bold"
+				}
+				]
+			}
+			],
+			"paddingAll": "20px",
+			"backgroundColor": "#FF6B6E",
+			"spacing": "sm",
+			"paddingTop": "22px"
+		},
+		"body": {
+		  "type": "box",
+		  "layout": "vertical",
+		  "contents": [
+			{
+			  "type": "box",
+			  "layout": "vertical",
+			  "spacing": "xl",
+			  "contents": [
+				` + inputFmt + `
+			  ]
+			}
+		  ]
+		},
+		"styles": {
+		  "footer": {
+			"separator": true
+		  }
+		}
+	  }
+	`
+
+	// Unmarshal JSON
+	flexContainer, err := linebot.UnmarshalFlexMessageJSON([]byte(jsonOutput))
+	if err != nil {
+		log.Println(err)
+	}
+
+	// New Flex Message
+	return linebot.NewFlexMessage("เลือกรายการที่ต้องการลบ", flexContainer)
 }
 func lineBot(c *gin.Context) {
 	bot := connectBot
@@ -193,6 +290,32 @@ func lineBot(c *gin.Context) {
 					if _, err = bot.ReplyMessage(event.ReplyToken, flexMessage).Do(); err != nil {
 						log.Print(err)
 					}
+				} else if message.Text == "นำสินค้าออกด้วยมือ" {
+					flexMessage := deleteManual()
+
+					// Reply Message
+					if _, err = bot.ReplyMessage(event.ReplyToken, flexMessage).Do(); err != nil {
+						log.Print(err)
+					}
+				} else if message.Text[:7] == "ลบ|" {
+					d := strings.Split(message.Text, "|")
+					barcode := d[2]
+
+					p := models.ProductHasExpiry{Barcode: barcode, Quantity: 1}
+
+					result := RemoveExpiry(p, client, ctx)
+					if result != nil {
+						log.Print(result)
+						if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage("เกิดข้อผิดพลาด โปรดลองอีกครั้ง")).Do(); err != nil {
+							log.Print(err)
+						}
+						return
+					}
+					if _, err = bot.ReplyMessage(event.ReplyToken, linebot.NewTextMessage(`ลบสินค้า [`+d[1]+`] เรียบร้อย`)).Do(); err != nil {
+						log.Print(err)
+					}
+				} else {
+					fmt.Println(message.Text)
 				}
 				break
 			}
